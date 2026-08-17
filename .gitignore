@@ -1,0 +1,45 @@
+# ==========================================
+# Environment & Secret Keys
+# Never commit database URLs or JWT secrets!
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ==========================================
+# PostgreSQL Dumps & Backups
+# Keeps raw database exports out of Git
+# ==========================================
+*.sql
+*.dump
+*.tar
+*.pgdump
+
+# ==========================================
+# Python & FastAPI
+# Virtual environment & compiled cache files
+# ==========================================
+backend/venv/
+backend/__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+
+# ==========================================
+# Next.js & Node.js
+# Downloaded packages & build output
+# ==========================================
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# ==========================================
+# System & Editor Files
+# OS temporary files & editor configs
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
