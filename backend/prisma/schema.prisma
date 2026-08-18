@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// ----------------------------------------------------
+// MODELS
+// ----------------------------------------------------
+
+model User {
+  id            Int        @id @default(autoincrement())
+  email         String     @unique
+  password_hash String
+  first_name    String
+  last_name     String
+  role          Role       @default(CUSTOMER)
+  is_verified   Boolean    @default(false)
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+
+
+  addresses     Address[]
+  cart          Cart?
+  orders        Order[]
+  reviews       Review[]
+  wishlist      Wishlist[]
+
+  @@map("users")
+}
+
+model Address {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  street      String
+  city        String
+  state       String
+  postal_code String
+  country     String
+  is_default  Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user   User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@map("addresses")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id             Int      @id @default(autoincrement())
+  category_id    Int
+  name           String
+  slug           String   @unique
+  description    String
+  price          Float
+  stock_quantity Int
+  is_active      Boolean  @default(true)
+  image_url      String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  category       Category    @relation(fields: [category_id], references: [id])
+  cart_items     CartItem[]
+  order_items    OrderItem[]
+  reviews        Review[]
+  wishlist_items Wishlist[]
+
+  @@index([category_id])
+  @@index([price])
+  @@index([name])
+  @@map("products")
+}
+
+model Cart {
+  id         Int      @id @default(autoincrement())
+  user_id    Int      @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user  User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id         Int      @id @default(autoincrement())
+  cart_id    Int
+  product_id Int
+  quantity   Int      @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([cart_id, product_id])
+  @@map("cart_items")
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  user_id       Int
+  address_id    Int
+  status        OrderStatus @default(PENDING)
+  subtotal      Float
+  shipping_cost Float       @default(0.0)
+  discount      Float       @default(0.0)
+  total_amount  Float
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  user    User        @relation(fields: [user_id], references: [id])
+  address Address     @relation(fields: [address_id], references: [id])
+  items   OrderItem[]
+
+  @@index([user_id])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                Int      @id @default(autoincrement())
+  order_id          Int
+  product_id        Int
+  price_at_purchase Float
+  quantity          Int
+  created_at        DateTime @default(now())
+
+  order   Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_items")
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@map("reviews")
+}
+
+model Wishlist {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  created_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@map("wishlists")
+}
