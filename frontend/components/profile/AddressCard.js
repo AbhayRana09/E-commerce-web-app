@@ -1,6 +1,6 @@
 "use client";
 
-export default function AddressCard({ address, onEdit, onDelete, onSetDefault }) {
+export default function AddressCard({ address, onEdit, onDelete, onSetDefault, onUnsetDefault }) {
   return (
     <div
       className={`relative bg-slate-900/90 border rounded-2xl p-5 shadow-xl transition flex flex-col justify-between ${
@@ -25,12 +25,19 @@ export default function AddressCard({ address, onEdit, onDelete, onSetDefault })
       </div>
 
       <div className="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-800/80 text-xs">
-        {!address.is_default && (
+        {!address.is_default ? (
           <button
             onClick={() => onSetDefault(address.id)}
             className="text-indigo-400 hover:text-indigo-300 font-medium transition cursor-pointer"
           >
             Set as Default
+          </button>
+        ) : (
+          <button
+            onClick={() => onUnsetDefault(address.id)}
+            className="text-amber-400 hover:text-amber-300 font-medium transition cursor-pointer"
+          >
+            Remove from Default
           </button>
         )}
         <button

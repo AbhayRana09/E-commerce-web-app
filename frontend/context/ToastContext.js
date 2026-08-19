@@ -8,8 +8,23 @@ export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
   const showToast = useCallback((message, type = "info") => {
+    let cleanMessage = "An alert occurred";
+    if (typeof message === "string") {
+      cleanMessage = message;
+    } else if (message instanceof Error) {
+      cleanMessage = message.message;
+    } else if (Array.isArray(message)) {
+      cleanMessage = message
+        .map((item) => (typeof item === "object" ? item?.msg || item?.message || JSON.stringify(item) : String(item)))
+        .join(" | ");
+    } else if (message && typeof message === "object") {
+      cleanMessage = message.message || message.msg || message.detail || JSON.stringify(message);
+    } else if (message != null) {
+      cleanMessage = String(message);
+    }
+
     const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message: cleanMessage, type }]);
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -23,8 +38,8 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      {/* Top-Right Toast Notification Container */}
-      <div className="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0">
+      {/* Top-Right Toast Notification Container - Highest z-index to show above all modals */}
+      <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0">
         {toasts.map((toast) => (
           <div
             key={toast.id}

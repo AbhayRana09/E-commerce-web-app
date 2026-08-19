@@ -1,6 +1,6 @@
 import re
 from math import ceil
-from typing import Optional
+from typing import Optional, List, Literal, Any, cast
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.database import db
@@ -26,18 +26,18 @@ async def list_products(
     category_id: Optional[int] = Query(None, description="Filter by category ID"),
     min_price: Optional[float] = Query(None, ge=0, description="Filter by minimum price"),
     max_price: Optional[float] = Query(None, ge=0, description="Filter by maximum price"),
-    sort: Optional[str] = Query("newest", enum=["newest", "price_asc", "price_desc"], description="Sort ordering"),
+    sort: Literal["newest", "price_asc", "price_desc"] = Query("newest", description="Sort ordering"),
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(12, ge=1, le=50, description="Items per page")
 ):
     """Fetch paginated product list with search, category, price filtering, and sorting."""
-    where = {"is_active": True}
+    where: dict[str, Any] = {"is_active": True}
 
     if category_id is not None:
         where["category_id"] = category_id
 
     if min_price is not None or max_price is not None:
-        price_filter = {}
+        price_filter: dict[str, Any] = {}
         if min_price is not None:
             price_filter["gte"] = min_price
         if max_price is not None:
@@ -52,7 +52,7 @@ async def list_products(
         ]
 
     # Handle sorting
-    order = {"created_at": "desc"}
+    order: dict[str, Any] = {"created_at": "desc"}
     if sort == "price_asc":
         order = {"price": "asc"}
     elif sort == "price_desc":
@@ -61,14 +61,14 @@ async def list_products(
     skip = (page - 1) * limit
 
     products = await db.product.find_many(
-        where=where,
+        where=cast(Any, where),
         include={"category": True},
-        order=order,
+        order=cast(Any, order),
         skip=skip,
         take=limit
     )
 
-    total = await db.product.count(where=where)
+    total = await db.product.count(where=cast(Any, where))
     total_pages = ceil(total / limit) if total > 0 else 1
 
     return {
@@ -77,6 +77,31 @@ async def list_products(
         "page": page,
         "limit": limit,
         "total_pages": total_pages
+    }
+
+@router.get("/admin/all", response_model=List[ProductOut])
+async def list_all_products_admin(current_admin=Depends(require_admin)):
+    """Fetch all products (active and inactive) for admin management."""
+    return await db.product.find_many(
+        order={"created_at": "desc"},
+        include={"category": True}
+    )
+
+@router.get("/admin/stats")
+async def get_admin_stats(current_admin=Depends(require_admin)):
+    """Fetch summary analytics for Admin Dashboard."""
+    total_products = await db.product.count()
+    active_products = await db.product.count(where={"is_active": True})
+    out_of_stock = await db.product.count(where={"stock_quantity": 0})
+    total_categories = await db.category.count()
+    total_users = await db.user.count()
+
+    return {
+        "total_products": total_products,
+        "active_products": active_products,
+        "out_of_stock": out_of_stock,
+        "total_categories": total_categories,
+        "total_users": total_users
     }
 
 @router.get("/{slug}", response_model=ProductOut)
@@ -171,7 +196,7 @@ async def update_product(
 
     updated_product = await db.product.update(
         where={"id": product_id},
-        data=update_data,
+        data=cast(Any, update_data),
         include={"category": True}
     )
     return updated_product

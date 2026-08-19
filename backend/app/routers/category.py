@@ -1,6 +1,6 @@
 import re
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from typing import List, Any, cast
 from app.database import db
 from app.schemas.category import CategoryCreate, CategoryUpdate, CategoryOut
 from app.dependencies.auth import require_admin
@@ -66,7 +66,7 @@ async def update_category(
             detail="Category not found"
         )
 
-    update_data = {}
+    update_data: dict[str, Any] = {}
     if category_in.name is not None:
         update_data["name"] = category_in.name
         update_data["slug"] = generate_slug(category_in.name)
@@ -75,7 +75,7 @@ async def update_category(
 
     return await db.category.update(
         where={"id": category_id},
-        data=update_data
+        data=cast(Any, update_data)
     )
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)

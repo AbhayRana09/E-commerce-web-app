@@ -23,7 +23,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
-    return encoded_jwt
+    return str(encoded_jwt)
 
 def decode_access_token(token: str) -> Optional[dict]:
     """Decodes and verifies a JWT access token."""
@@ -37,7 +37,8 @@ def create_email_verification_token(email: str) -> str:
     """Generates a signed JWT for email verification (valid for 24h)."""
     expire = datetime.now(timezone.utc) + timedelta(hours=24)
     payload = {"sub": email, "purpose": "verify_email", "exp": expire}
-    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    encoded_jwt = jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    return str(encoded_jwt)
 
 def decode_email_verification_token(token: str) -> Optional[str]:
     """Validates an email verification JWT and returns the email."""
@@ -53,7 +54,8 @@ def create_password_reset_token(email: str) -> str:
     """Generates a signed JWT for password reset (valid for 15 mins)."""
     expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     payload = {"sub": email, "purpose": "reset_password", "exp": expire}
-    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    encoded_jwt = jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    return str(encoded_jwt)
 
 def decode_password_reset_token(token: str) -> Optional[str]:
     """Validates a password reset JWT and returns the email."""

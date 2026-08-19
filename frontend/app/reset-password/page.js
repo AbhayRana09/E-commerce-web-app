@@ -12,26 +12,13 @@ import {
   autoFocusFirstError,
 } from "@/lib/validation";
 import RouteGuard from "@/components/RouteGuard";
+import { PasswordToggleButton } from "@/components/ui/EyeIcons";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { showToast } = useToast();
   const token = searchParams.get("token");
-
-  useEffect(() => {
-    if (!token) {
-      router.replace("/forgot-password");
-    }
-  }, [token, router]);
-
-  if (!token) {
-    return null;
-  }
-
-
-
-
 
   const [formData, setFormData] = useState({
     newPassword: "",
@@ -52,9 +39,12 @@ function ResetPasswordContent() {
   const isSubmittingRef = useRef(false);
 
   // Field refs for auto-focus
+  const newPasswordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
+
   const fieldRefs = {
-    newPassword: useRef(null),
-    confirmPassword: useRef(null),
+    newPassword: newPasswordRef,
+    confirmPassword: confirmPasswordRef,
   };
 
   // Real-time error calculations
@@ -196,7 +186,7 @@ function ResetPasswordContent() {
             <div className="relative">
               <input
                 id="new_password"
-                ref={fieldRefs.newPassword}
+                ref={newPasswordRef}
                 type={showPassword ? "text" : "password"}
                 name="newPassword"
                 suppressHydrationWarning
@@ -213,13 +203,11 @@ function ResetPasswordContent() {
                     : "border-slate-800 focus:border-indigo-500"
                 }`}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs px-2 py-1 cursor-pointer select-none font-medium"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
+              <PasswordToggleButton
+                show={showPassword}
+                onToggle={() => setShowPassword((prev) => !prev)}
+                ariaLabel={showPassword ? "Hide password" : "Show password"}
+              />
             </div>
             <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
               {touched.newPassword && errors.newPassword ? errors.newPassword : "\u00A0"}
@@ -238,7 +226,7 @@ function ResetPasswordContent() {
             <div className="relative">
               <input
                 id="confirm_new_password"
-                ref={fieldRefs.confirmPassword}
+                ref={confirmPasswordRef}
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 suppressHydrationWarning
@@ -256,13 +244,11 @@ function ResetPasswordContent() {
                 }`}
               />
 
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs px-2 py-1 cursor-pointer select-none font-medium"
-              >
-                {showConfirmPassword ? "Hide" : "Show"}
-              </button>
+              <PasswordToggleButton
+                show={showConfirmPassword}
+                onToggle={() => setShowConfirmPassword((prev) => !prev)}
+                ariaLabel={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+              />
             </div>
             <div className="h-5 mt-1 text-xs font-medium leading-5">
               {touched.confirmPassword && errors.confirmPassword ? (

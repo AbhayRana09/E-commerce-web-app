@@ -14,6 +14,7 @@ import {
 } from "@/lib/validation";
 
 import RouteGuard from "@/components/RouteGuard";
+import { PasswordToggleButton } from "@/components/ui/EyeIcons";
 
 function RegisterContent() {
 
@@ -45,12 +46,18 @@ function RegisterContent() {
   const isSubmittingRef = useRef(false);
 
   // Field DOM refs for auto-focus on error
+  const firstNameRef = useRef(null);
+  const lastNameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
+
   const fieldRefs = {
-    first_name: useRef(null),
-    last_name: useRef(null),
-    email: useRef(null),
-    password: useRef(null),
-    confirmPassword: useRef(null),
+    first_name: firstNameRef,
+    last_name: lastNameRef,
+    email: emailRef,
+    password: passwordRef,
+    confirmPassword: confirmPasswordRef,
   };
 
   // Real-time error calculations
@@ -160,7 +167,7 @@ function RegisterContent() {
               </label>
               <input
                 id="first_name"
-                ref={fieldRefs.first_name}
+                ref={firstNameRef}
                 type="text"
                 name="first_name"
                 suppressHydrationWarning
@@ -190,7 +197,7 @@ function RegisterContent() {
               </label>
               <input
                 id="last_name"
-                ref={fieldRefs.last_name}
+                ref={lastNameRef}
                 type="text"
                 name="last_name"
                 suppressHydrationWarning
@@ -222,7 +229,7 @@ function RegisterContent() {
             </label>
             <input
               id="email"
-              ref={fieldRefs.email}
+              ref={emailRef}
               type="email"
               name="email"
               suppressHydrationWarning
@@ -256,7 +263,7 @@ function RegisterContent() {
               <div className="relative">
                 <input
                   id="password"
-                  ref={fieldRefs.password}
+                  ref={passwordRef}
                   type={showPassword ? "text" : "password"}
                   name="password"
                   suppressHydrationWarning
@@ -272,13 +279,11 @@ function RegisterContent() {
                         : "border-slate-800 focus:border-indigo-500"
                     }`}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs px-2 py-1 cursor-pointer select-none font-medium"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
+                <PasswordToggleButton
+                  show={showPassword}
+                  onToggle={() => setShowPassword((prev) => !prev)}
+                  ariaLabel={showPassword ? "Hide password" : "Show password"}
+                />
               </div>
               <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
                 {touched.password && errors.password ? errors.password : "\u00A0"}
@@ -296,7 +301,7 @@ function RegisterContent() {
               <div className="relative">
                 <input
                   id="confirmPassword"
-                  ref={fieldRefs.confirmPassword}
+                  ref={confirmPasswordRef}
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   suppressHydrationWarning
@@ -313,13 +318,11 @@ function RegisterContent() {
                     }`}
                 />
 
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs px-2 py-1 cursor-pointer select-none font-medium"
-                >
-                  {showConfirmPassword ? "Hide" : "Show"}
-                </button>
+                <PasswordToggleButton
+                  show={showConfirmPassword}
+                  onToggle={() => setShowConfirmPassword((prev) => !prev)}
+                  ariaLabel={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                />
               </div>
               <div className="h-5 mt-1 text-xs font-medium leading-5">
                 {touched.confirmPassword && errors.confirmPassword ? (
