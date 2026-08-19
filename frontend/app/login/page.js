@@ -13,6 +13,7 @@ import {
 } from "@/lib/validation";
 
 import RouteGuard from "@/components/RouteGuard";
+import { PasswordToggleButton } from "@/components/ui/EyeIcons";
 
 function LoginContent() {
 
@@ -40,9 +41,11 @@ function LoginContent() {
   const isSubmittingRef = useRef(false);
 
   // Field refs for auto-focus on error
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
   const fieldRefs = {
-    email: useRef(null),
-    password: useRef(null),
+    email: emailRef,
+    password: passwordRef,
   };
 
   // Real-time error calculations
@@ -71,9 +74,13 @@ function LoginContent() {
       const password = passwordToUse || formData.password;
 
       try {
-        await login(email, password);
+        const loggedInUser = await login(email, password);
         showToast("Logged in successfully!", "success");
-        router.push("/profile");
+        if (loggedInUser?.role === "ADMIN") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
         return true;
       } catch (err) {
         const msg = err.message || "Login failed. Please check your credentials.";
@@ -199,7 +206,7 @@ function LoginContent() {
           </label>
           <input
             id="login_email"
-            ref={fieldRefs.email}
+            ref={emailRef}
             type="email"
             name="email"
             suppressHydrationWarning
@@ -231,7 +238,7 @@ function LoginContent() {
           <div className="relative">
             <input
               id="login_password"
-              ref={fieldRefs.password}
+              ref={passwordRef}
               type={showPassword ? "text" : "password"}
               name="password"
               suppressHydrationWarning
@@ -246,13 +253,11 @@ function LoginContent() {
                 }`}
             />
 
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs px-2 py-1 cursor-pointer select-none font-medium"
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
+            <PasswordToggleButton
+              show={showPassword}
+              onToggle={() => setShowPassword((prev) => !prev)}
+              ariaLabel={showPassword ? "Hide password" : "Show password"}
+            />
           </div>
           <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
             {touched.password && errors.password ? errors.password : "\u00A0"}
@@ -316,7 +321,7 @@ function LoginContent() {
 
 
       <div className="text-center mt-8 pt-6 border-t border-slate-800 text-sm text-slate-400">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">
           Create an account
         </Link>

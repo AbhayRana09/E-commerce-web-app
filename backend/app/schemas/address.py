@@ -59,6 +59,8 @@ class AddressUpdate(BaseModel):
         return v
 
 class AddressOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     street: str
@@ -68,7 +70,4 @@ class AddressOut(BaseModel):
     country: str
     is_default: bool
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 

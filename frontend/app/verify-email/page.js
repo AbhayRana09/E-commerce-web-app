@@ -11,15 +11,12 @@ function VerifyEmailContent() {
   const token = searchParams.get("token");
   const { showToast } = useToast();
 
-  const [status, setStatus] = useState("verifying");
-  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState(token ? "verifying" : "error");
+  const [message, setMessage] = useState(token ? "" : "No verification token provided in the URL.");
   const calledRef = useRef(false);
 
   useEffect(() => {
-    // Validates token parameter existence before calling verification endpoint
     if (!token) {
-      setStatus("error");
-      setMessage("No verification token provided in the URL.");
       showToast("No verification token found in URL.", "error");
       return;
     }

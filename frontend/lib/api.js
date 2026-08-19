@@ -26,7 +26,26 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.detail || "Something went wrong";
+    let message = "Something went wrong";
+    const detail = error.response?.data?.detail;
+
+    if (typeof detail === "string") {
+      message = detail;
+    } else if (Array.isArray(detail)) {
+      // FastAPI 422 validation errors are returned as a list of error objects
+      message = detail
+        .map((err) => {
+          const field = err.loc ? err.loc[err.loc.length - 1] : "";
+          const msg = err.msg || "Invalid input";
+          return field ? `${field}: ${msg}` : msg;
+        })
+        .join(" | ");
+    } else if (detail && typeof detail === "object") {
+      message = detail.message || detail.msg || JSON.stringify(detail);
+    } else if (error.message) {
+      message = error.message;
+    }
+
     return Promise.reject(new Error(message));
   }
 );

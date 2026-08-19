@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from typing import List, Any, cast
 from app.database import db
 from app.schemas.address import AddressCreate, AddressUpdate, AddressOut
 from app.dependencies.auth import get_current_user
@@ -67,7 +67,7 @@ async def update_address(
 
     updated_address = await db.address.update(
         where={"id": address_id},
-        data=update_data
+        data=cast(Any, update_data)
     )
     return updated_address
 
@@ -112,5 +112,26 @@ async def set_default_address(
     updated_address = await db.address.update(
         where={"id": address_id},
         data={"is_default": True}
+    )
+    return updated_address
+
+@router.patch("/{address_id}/unset-default", response_model=AddressOut)
+async def unset_default_address(
+    address_id: int,
+    current_user: User = Depends(get_current_user)
+):
+    """Unset default status for a specific address."""
+    address = await db.address.find_first(
+        where={"id": address_id, "user_id": current_user.id}
+    )
+    if not address:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address not found"
+        )
+
+    updated_address = await db.address.update(
+        where={"id": address_id},
+        data={"is_default": False}
     )
     return updated_address

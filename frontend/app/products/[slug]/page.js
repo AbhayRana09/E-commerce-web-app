@@ -5,8 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getProductBySlug } from "@/lib/products";
 import { useToast } from "@/context/ToastContext";
+import RouteGuard from "@/components/RouteGuard";
 
-export default function ProductDetailPage() {
+function ProductDetailContent() {
   const params = useParams();
   const router = useRouter();
   const { showToast } = useToast();
@@ -221,5 +222,13 @@ export default function ProductDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductDetailPage() {
+  return (
+    <RouteGuard type="customer" adminRedirect="/admin/products">
+      <ProductDetailContent />
+    </RouteGuard>
   );
 }

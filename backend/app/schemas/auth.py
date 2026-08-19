@@ -63,6 +63,8 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: EmailStr
     first_name: str
@@ -70,9 +72,6 @@ class UserOut(BaseModel):
     role: str
     is_verified: bool
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class ForgotPasswordRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
