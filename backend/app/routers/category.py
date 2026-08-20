@@ -35,7 +35,8 @@ async def create_category(
     current_admin=Depends(require_admin)
 ):
     """Create a new category (Admin only)."""
-    slug = generate_slug(category_in.name)
+    clean_name = category_in.name.strip()
+    slug = generate_slug(clean_name)
     
     existing = await db.category.find_unique(where={"slug": slug})
     if existing:
@@ -46,9 +47,9 @@ async def create_category(
 
     return await db.category.create(
         data={
-            "name": category_in.name,
+            "name": clean_name,
             "slug": slug,
-            "description": category_in.description
+            "description": category_in.description.strip() if category_in.description else None
         }
     )
 
@@ -68,10 +69,21 @@ async def update_category(
 
     update_data: dict[str, Any] = {}
     if category_in.name is not None:
-        update_data["name"] = category_in.name
-        update_data["slug"] = generate_slug(category_in.name)
+        clean_name = category_in.name.strip()
+        slug = generate_slug(clean_name)
+        
+        # Check slug conflict with other categories
+        existing = await db.category.find_unique(where={"slug": slug})
+        if existing and existing.id != category_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Another category with this name already exists"
+            )
+            
+        update_data["name"] = clean_name
+        update_data["slug"] = slug
     if category_in.description is not None:
-        update_data["description"] = category_in.description
+        update_data["description"] = category_in.description.strip() if category_in.description else None
 
     return await db.category.update(
         where={"id": category_id},

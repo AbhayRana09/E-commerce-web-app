@@ -158,6 +158,76 @@ export function validateProfileImage(file) {
 }
 
 /**
+ * Validates Category Name
+ * - Required
+ * - Length: 2 - 50 characters
+ */
+export function validateCategoryName(name) {
+  if (!name || name.trim().length === 0) {
+    return "Category name is required.";
+  }
+  const trimmed = name.trim();
+  if (trimmed.length < 2) {
+    return "Category name must be at least 2 characters.";
+  }
+  if (trimmed.length > 50) {
+    return "Category name cannot exceed 50 characters.";
+  }
+  return "";
+}
+
+/**
+ * Validates Category Description
+ * - Optional
+ * - Max length: 300 characters
+ */
+export function validateCategoryDescription(desc) {
+  if (!desc) return "";
+  if (desc.trim().length > 300) {
+    return "Description cannot exceed 300 characters.";
+  }
+  return "";
+}
+
+/**
+ * Validates Product Name
+ * - Required
+ * - Length: 2 - 120 characters
+ */
+export function validateProductName(name) {
+  if (!name || name.trim().length === 0) {
+    return "Product name is required.";
+  }
+  const trimmed = name.trim();
+  if (trimmed.length < 2) {
+    return "Product name must be at least 2 characters.";
+  }
+  if (trimmed.length > 120) {
+    return "Product name cannot exceed 120 characters.";
+  }
+  return "";
+}
+
+/**
+ * Validates Product Description
+ * - Required
+ * - Length: 5 - 2000 characters
+ */
+export function validateProductDescription(desc) {
+  if (!desc || desc.trim().length === 0) {
+    return "Product description is required.";
+  }
+  const trimmed = desc.trim();
+  if (trimmed.length < 5) {
+    return "Product description must be at least 5 characters.";
+  }
+  if (trimmed.length > 2000) {
+    return "Product description cannot exceed 2000 characters.";
+  }
+  return "";
+}
+
+/**
  * Helper to auto-focus the first invalid input element in a form
  * @param {Record<string, string>} errors - Object containing field error strings
  * @param {Record<string, HTMLElement | null>} fieldRefs - Map of field name to DOM element
@@ -173,3 +243,4 @@ export function autoFocusFirstError(errors, fieldRefs) {
     }
   }
 }
+

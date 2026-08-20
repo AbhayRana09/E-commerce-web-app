@@ -324,7 +324,41 @@ function ProfileContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-16">
+    <div className="w-full max-w-5xl mx-auto space-y-6 pb-16">
+      {/* Profile Section Tabs */}
+      <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800 w-fit shadow-lg">
+        <button
+          type="button"
+          onClick={() => router.push("/profile?tab=profile")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+            activeTab === "profile"
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+              : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span>Account Overview</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => router.push("/profile?tab=addresses")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+            activeTab === "addresses"
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+              : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Saved Addresses {addresses.length > 0 ? `(${addresses.length})` : ""}</span>
+        </button>
+      </div>
+
       {activeTab === "profile" ? (
         <>
           {/* User Info Header with Action Buttons */}

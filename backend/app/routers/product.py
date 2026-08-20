@@ -26,7 +26,7 @@ async def list_products(
     category_id: Optional[int] = Query(None, description="Filter by category ID"),
     min_price: Optional[float] = Query(None, ge=0, description="Filter by minimum price"),
     max_price: Optional[float] = Query(None, ge=0, description="Filter by maximum price"),
-    sort: Literal["newest", "price_asc", "price_desc"] = Query("newest", description="Sort ordering"),
+    sort: Literal["newest", "price_asc", "price_desc", "name_asc", "name_desc"] = Query("newest", description="Sort ordering"),
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(12, ge=1, le=50, description="Items per page")
 ):
@@ -57,6 +57,10 @@ async def list_products(
         order = {"price": "asc"}
     elif sort == "price_desc":
         order = {"price": "desc"}
+    elif sort == "name_asc":
+        order = {"name": "asc"}
+    elif sort == "name_desc":
+        order = {"name": "desc"}
 
     skip = (page - 1) * limit
 
