@@ -1,14 +1,14 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
 class CategoryCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(..., min_length=2, max_length=50, description="Category name (2 to 50 characters)")
+    description: Optional[str] = Field(None, max_length=300, description="Category description (maximum 300 characters)")
 
 class CategoryUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=2, max_length=50, description="Category name (2 to 50 characters)")
+    description: Optional[str] = Field(None, max_length=300, description="Category description (maximum 300 characters)")
 
 class CategoryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)

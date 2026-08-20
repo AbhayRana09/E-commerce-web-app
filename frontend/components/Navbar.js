@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { useCart } from "@/context/CartContext";
 import { getCategories } from "@/lib/products";
 
 function NavbarContent() {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
+  const { totalItems } = useCart();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,7 +21,9 @@ function NavbarContent() {
   const dropdownRef = useRef(null);
 
   const isAdminRoute = pathname?.startsWith("/admin");
+  const isProfileRoute = pathname?.startsWith("/profile");
   const isSuperAdmin = user?.role === "ADMIN";
+  const isHome = pathname === "/";
 
   const currentSearch = searchParams?.get("search") || "";
   const currentCategory = searchParams?.get("category_id") || "";
@@ -46,7 +50,8 @@ function NavbarContent() {
       params.delete("search");
     }
     params.set("page", "1");
-    router.replace(`/?${params.toString()}`);
+    const query = params.toString();
+    router.push(`/${query ? `?${query}` : ""}`);
   };
 
   const handleCategorySelect = (catId) => {
@@ -57,7 +62,8 @@ function NavbarContent() {
       params.delete("category_id");
     }
     params.set("page", "1");
-    router.replace(`/?${params.toString()}`);
+    const query = params.toString();
+    router.push(`/${query ? `?${query}` : ""}`);
   };
 
   // Close dropdown on click outside or Escape key
@@ -83,7 +89,7 @@ function NavbarContent() {
   return (
     <nav className="bg-slate-900/95 text-white border-b border-slate-800 sticky top-0 z-50 backdrop-blur-md">
       {/* Tier 1: Primary Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo / Section Header */}
         <div className="flex items-center gap-3 shrink-0">
           {isAdminRoute || isSuperAdmin ? (
@@ -107,45 +113,40 @@ function NavbarContent() {
           )}
         </div>
 
-        {/* Global Product Search Bar in Navbar Tier 1 (Only for Customers & Guests) */}
+        {/* Global Multi-Tier Search Bar (Only shown on customer pages) */}
         {!isAdminRoute && !isSuperAdmin && (
-          <div className="flex-1 max-w-xl mx-2">
-            <div className="relative flex items-center">
+          <div className="flex-1 max-w-xl mx-2 hidden md:block">
+            <div className="relative">
               <input
                 type="text"
-                placeholder="Search products by name, tag, or keyword..."
-                value={currentSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-4 py-2 pl-9 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition shadow-inner"
+                placeholder="Search products by title, category, or tags..."
+                defaultValue={currentSearch}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearchChange(e.target.value);
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.target.value !== currentSearch) {
+                    handleSearchChange(e.target.value);
+                  }
+                }}
+                className="w-full bg-slate-950/80 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-2 pl-10 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition"
               />
               <svg
-                className="w-4 h-4 text-indigo-400 absolute left-3 pointer-events-none"
+                className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-
-              {currentSearch && (
-                <button
-                  onClick={() => handleSearchChange("")}
-                  className="absolute right-3 text-slate-400 hover:text-white text-xs"
-                >
-                  ✕
-                </button>
-              )}
             </div>
           </div>
         )}
 
         {/* Navigation Links & User Menu */}
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {!isAdminRoute && !isSuperAdmin && (
             <Link
               href="/"
@@ -235,9 +236,9 @@ function NavbarContent() {
                     </Link>
                   )}
 
-                  {/* My Profile Link */}
+                  {/* My Profile Link (Contains Profile, Security & Saved Addresses tabs) */}
                   <Link
-                    href="/profile?tab=profile"
+                    href="/profile"
                     onClick={() => setDropdownOpen(false)}
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/70 transition"
                   >
@@ -245,19 +246,6 @@ function NavbarContent() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     My Profile
-                  </Link>
-
-                  {/* Addresses / Saved Addresses Link */}
-                  <Link
-                    href="/profile?tab=addresses"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/70 transition"
-                  >
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Addresses / Saved Addresses
                   </Link>
 
                   <div className="my-1 border-t border-slate-800/80"></div>
@@ -296,18 +284,53 @@ function NavbarContent() {
               </Link>
             </div>
           )}
+
+          {/* Shopping Cart Icon (Hidden on Admin & Profile Pages) */}
+          {!isAdminRoute && !isSuperAdmin && !isProfileRoute && (
+            <Link
+              href="/cart"
+              className={`relative p-2.5 rounded-xl border transition flex items-center justify-center cursor-pointer group shrink-0 ${
+                pathname === "/cart"
+                  ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/30"
+                  : "bg-slate-800/80 border-slate-700/60 hover:border-indigo-500/50 hover:bg-slate-800 text-slate-300 hover:text-white"
+              }`}
+              title={`Shopping Cart (${totalItems} items)`}
+              aria-label="Shopping Cart"
+            >
+              <svg
+                className="w-5 h-5 text-slate-200 group-hover:text-indigo-400 group-hover:scale-105 transition-transform"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+                />
+              </svg>
+
+              {/* Floating Dynamic Item Badge on Top-Right Corner */}
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded-full min-w-[19px] h-[19px] flex items-center justify-center shadow-lg shadow-indigo-600/50 border border-slate-900 animate-in zoom-in-50 duration-200">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
+            </Link>
+          )}
         </div>
       </div>
 
       {/* Tier 2: Secondary Category Sub-Navbar Strip (Only for Customers & Guests) */}
       {!isAdminRoute && !isSuperAdmin && categories.length > 0 && (
         <div className="border-t border-slate-800/80 bg-slate-950/80 px-4 sm:px-6 lg:px-8 py-2">
-          <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-none">
+          <div className="w-full max-w-[1700px] mx-auto flex items-center gap-2 overflow-x-auto scrollbar-none">
             <button
               type="button"
               onClick={() => handleCategorySelect("")}
               className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
-                currentCategory === ""
+                isHome && currentCategory === ""
                   ? "bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-600/30"
                   : "bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
               }`}
@@ -315,20 +338,23 @@ function NavbarContent() {
               All Categories
             </button>
 
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleCategorySelect(cat.id)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
-                  currentCategory === cat.id
-                    ? "bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-600/30"
-                    : "bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const isSelected = isHome && String(currentCategory) === String(cat.id);
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleCategorySelect(cat.id)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
+                    isSelected
+                      ? "bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-600/30"
+                      : "bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

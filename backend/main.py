@@ -7,6 +7,7 @@ from app.routers.address import router as address_router
 from app.routers.category import router as category_router
 from app.routers.product import router as product_router
 from app.routers.order import router as order_router
+from app.routers.cart import router as cart_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,7 +22,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="E-Commerce REST API",
-    description="FastAPI + PostgreSQL + Prisma E-Commerce Platform",
+    description="E-Commerce Platform",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -41,6 +42,7 @@ app.include_router(address_router)
 app.include_router(category_router)
 app.include_router(product_router)
 app.include_router(order_router)
+app.include_router(cart_router)
 
 @app.get("/")
 async def root():

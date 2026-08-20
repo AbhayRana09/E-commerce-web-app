@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { getCategories } from "@/lib/products";
 import { createCategory, updateCategory, deleteCategory } from "@/lib/admin";
 import { useToast } from "@/context/ToastContext";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { validateCategoryName, validateCategoryDescription } from "@/lib/validation";
 
 export default function AdminCategoriesPage() {
   const { showToast } = useToast();
@@ -16,7 +18,11 @@ export default function AdminCategoriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [touched, setTouched] = useState({ name: false, description: false });
+
+  // Confirmation dialogs
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -33,34 +39,67 @@ export default function AdminCategoriesPage() {
     loadCategories();
   }, [loadCategories]);
 
+  const nameError = touched.name ? validateCategoryName(formData.name) : "";
+  const descError = touched.description ? validateCategoryDescription(formData.description) : "";
+
   const openCreateModal = () => {
     setEditingCategory(null);
     setFormData({ name: "", description: "" });
+    setTouched({ name: false, description: false });
     setIsModalOpen(true);
   };
 
   const openEditModal = (cat) => {
     setEditingCategory(cat);
     setFormData({ name: cat.name, description: cat.description || "" });
+    setTouched({ name: false, description: false });
     setIsModalOpen(true);
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) {
-      showToast("Category name is required", "error");
+    setTouched({ name: true, description: true });
+
+    const errName = validateCategoryName(formData.name);
+    const errDesc = validateCategoryDescription(formData.description);
+    if (errName || errDesc) {
+      showToast(errName || errDesc, "error");
       return;
     }
 
+    if (editingCategory) {
+      // Check if anything actually changed
+      const isUnchanged =
+        formData.name.trim() === editingCategory.name &&
+        (formData.description || "").trim() === (editingCategory.description || "").trim();
+
+      if (isUnchanged) {
+        setIsModalOpen(false);
+        return;
+      }
+    }
+
+    // Prompt confirmation modal for both create and edit
+    setShowSaveConfirm(true);
+  };
+
+  const executeSave = async () => {
     try {
       setSubmitting(true);
+      const payload = {
+        name: formData.name.trim(),
+        description: formData.description.trim() ? formData.description.trim() : null,
+      };
+
       if (editingCategory) {
-        await updateCategory(editingCategory.id, formData);
-        showToast(`Category "${formData.name}" updated successfully!`, "success");
+        await updateCategory(editingCategory.id, payload);
+        showToast(`Category "${payload.name}" updated successfully!`, "success");
       } else {
-        await createCategory(formData);
-        showToast(`Category "${formData.name}" created successfully!`, "success");
+        await createCategory(payload);
+        showToast(`Category "${payload.name}" created successfully!`, "success");
       }
+
+      setShowSaveConfirm(false);
       setIsModalOpen(false);
       loadCategories();
     } catch (err) {
@@ -70,12 +109,13 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const handleDelete = async (id, name) => {
+  const handleConfirmedDelete = async () => {
+    if (!categoryToDelete) return;
     try {
       setSubmitting(true);
-      await deleteCategory(id);
-      showToast(`Category "${name}" deleted successfully!`, "success");
-      setDeleteConfirmId(null);
+      await deleteCategory(categoryToDelete.id);
+      showToast(`Category "${categoryToDelete.name}" deleted successfully!`, "success");
+      setCategoryToDelete(null);
       loadCategories();
     } catch (err) {
       showToast(err.message || "Failed to delete category", "error");
@@ -129,13 +169,21 @@ export default function AdminCategoriesPage() {
               className="bg-slate-900/70 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between transition-all"
             >
               <div>
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-semibold text-slate-100 text-base">{cat.name}</h3>
-                  <span className="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md border border-slate-700/50">
+                <div className="flex items-start justify-between gap-2">
+                  <h3
+                    className="font-semibold text-slate-100 text-base break-words line-clamp-1"
+                    title={cat.name}
+                  >
+                    {cat.name}
+                  </h3>
+                  <span
+                    className="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md border border-slate-700/50 shrink-0 max-w-[130px] truncate"
+                    title={`/${cat.slug}`}
+                  >
                     /{cat.slug}
                   </span>
                 </div>
-                <p className="text-slate-400 text-xs mt-2 line-clamp-3 leading-relaxed">
+                <p className="text-slate-400 text-xs mt-2.5 line-clamp-3 leading-relaxed break-words">
                   {cat.description || "No description provided."}
                 </p>
               </div>
@@ -149,95 +197,145 @@ export default function AdminCategoriesPage() {
                   Edit
                 </button>
                 <button
-                  onClick={() => setDeleteConfirmId(cat.id)}
+                  onClick={() => setCategoryToDelete(cat)}
                   className="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-red-500/30 transition cursor-pointer"
                 >
                   Delete
                 </button>
               </div>
-
-              {/* Delete confirmation inline */}
-              {deleteConfirmId === cat.id && (
-                <div className="mt-3 p-3 bg-red-950/40 border border-red-800/60 rounded-xl text-xs space-y-2">
-                  <p className="text-red-300 font-medium">Are you sure? This cannot be undone.</p>
-                  <div className="flex items-center gap-2 justify-end">
-                    <button
-                      onClick={() => setDeleteConfirmId(null)}
-                      className="px-2.5 py-1 text-slate-300 hover:bg-slate-800 rounded-md"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => handleDelete(cat.id, cat.name)}
-                      disabled={submitting}
-                      className="px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-md transition"
-                    >
-                      Confirm Delete
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal for Create / Edit Category */}
+      {/* Modal for Create / Edit Category (Wider max-w-2xl layout) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-base font-bold text-white">
-                {editingCategory ? "Edit Category" : "Add New Category"}
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                  <span>{editingCategory ? "✏️" : "📁"}</span>
+                  {editingCategory ? "Edit Category" : "Add New Category"}
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  {editingCategory
+                    ? `Update catalog specifications and description for "${editingCategory.name}".`
+                    : "Create a new department to group and catalog store products."}
+                </p>
+              </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white text-lg leading-none cursor-pointer"
+                className="text-slate-400 hover:text-white text-base p-1.5 rounded-full hover:bg-slate-800 transition cursor-pointer"
+                title="Close modal"
               >
-                &times;
+                ✕
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="space-y-4">
+            <form onSubmit={handleFormSubmit} noValidate className="space-y-5">
+              {/* Category Name */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Category Name *
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Category Name <span className="text-red-400">*</span>
+                  </label>
+                  <span
+                    className={`text-[11px] font-mono ${
+                      formData.name.length >= 50
+                        ? "text-red-400 font-bold"
+                        : formData.name.length >= 40
+                        ? "text-amber-400"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {formData.name.length}/50
+                  </span>
+                </div>
                 <input
                   type="text"
-                  required
+                  maxLength={50}
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Electronics, Fashion, Home Decor"
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition"
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    setTouched((prev) => ({ ...prev, name: true }));
+                  }}
+                  onBlur={() => setTouched((prev) => ({ ...prev, name: true }))}
+                  placeholder="e.g. Consumer Electronics, Smart Home, Fashion & Apparel"
+                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition ${
+                    nameError
+                      ? "border-red-500/80 bg-red-950/10 focus:border-red-500"
+                      : "border-slate-800 focus:border-indigo-500"
+                  }`}
                 />
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-xs text-red-400 font-medium">
+                    {nameError || ""}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Max 50 characters (Industry Standard)
+                  </span>
+                </div>
               </div>
 
+              {/* Description */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Description
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Description <span className="text-slate-500 normal-case">(Optional)</span>
+                  </label>
+                  <span
+                    className={`text-[11px] font-mono ${
+                      formData.description.length >= 300
+                        ? "text-red-400 font-bold"
+                        : formData.description.length >= 250
+                        ? "text-amber-400"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {formData.description.length}/300
+                  </span>
+                </div>
                 <textarea
-                  rows={3}
+                  rows={4}
+                  maxLength={300}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Brief description of this category..."
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition resize-none"
+                  onChange={(e) => {
+                    setFormData({ ...formData, description: e.target.value });
+                    setTouched((prev) => ({ ...prev, description: true }));
+                  }}
+                  onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
+                  placeholder="Brief summary explaining which items belong to this category..."
+                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition resize-none ${
+                    descError
+                      ? "border-red-500/80 bg-red-950/10 focus:border-red-500"
+                      : "border-slate-800 focus:border-indigo-500"
+                  }`}
                 />
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-xs text-red-400 font-medium">
+                    {descError || ""}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Max 300 characters
+                  </span>
+                </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2 rounded-xl transition shadow-md shadow-indigo-600/20"
+                  disabled={submitting || !!nameError || !!descError}
+                  className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold px-6 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20 cursor-pointer disabled:cursor-not-allowed"
                 >
                   {submitting ? "Saving..." : editingCategory ? "Save Changes" : "Create Category"}
                 </button>
@@ -246,6 +344,32 @@ export default function AdminCategoriesPage() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Dialog for Create / Save Category Changes */}
+      <ConfirmDialog
+        open={showSaveConfirm}
+        onOpenChange={setShowSaveConfirm}
+        title={editingCategory ? "Save Category Changes?" : "Create New Category?"}
+        message={
+          editingCategory
+            ? `Are you sure you want to update category "${formData.name.trim()}"? These modifications will reflect immediately across your store catalog.`
+            : `Are you sure you want to create category "${formData.name.trim()}"? It will become available immediately for catalog organization.`
+        }
+        actionType="save"
+        onConfirm={executeSave}
+      />
+
+      {/* Confirmation Dialog for Delete Category */}
+      <ConfirmDialog
+        open={!!categoryToDelete}
+        onOpenChange={(open) => {
+          if (!open) setCategoryToDelete(null);
+        }}
+        title={`Delete Category "${categoryToDelete?.name}"?`}
+        message="Are you sure you want to delete this category? This action cannot be undone and will affect products catalog grouping."
+        actionType="delete"
+        onConfirm={handleConfirmedDelete}
+      />
     </div>
   );
 }

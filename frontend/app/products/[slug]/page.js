@@ -5,12 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getProductBySlug } from "@/lib/products";
 import { useToast } from "@/context/ToastContext";
+import { useCart } from "@/context/CartContext";
 import RouteGuard from "@/components/RouteGuard";
 
 function ProductDetailContent() {
   const params = useParams();
   const router = useRouter();
   const { showToast } = useToast();
+  const { addItem, loading: cartLoading } = useCart();
   const slug = params?.slug;
 
   const [product, setProduct] = useState(null);
@@ -37,9 +39,9 @@ function ProductDetailContent() {
     loadProduct();
   }, [slug]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    showToast(`Added ${quantity} x "${product.name}" to your cart!`, "success");
+    await addItem(product.id, quantity);
   };
 
   if (loading) {
@@ -128,20 +130,22 @@ function ProductDetailContent() {
             <div className="space-y-4">
               {/* Availability Badge */}
               <div className="flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${
-                    isOutOfStock
-                      ? "bg-red-500/10 text-red-400 border-red-500/20"
-                      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isOutOfStock ? "bg-red-400" : "bg-emerald-400"
-                    }`}
-                  ></span>
-                  {isOutOfStock ? "Out of Stock" : `In Stock (${product.stock_quantity} available)`}
-                </span>
+                {isOutOfStock ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-red-500/10 text-red-400 border-red-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                    <span>Out of Stock</span>
+                  </span>
+                ) : product.stock_quantity <= 5 ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-500/10 text-amber-300 border-amber-500/30">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span>Only {product.stock_quantity} left in stock!</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>In Stock</span>
+                  </span>
+                )}
               </div>
 
               {/* Product Title */}
@@ -196,8 +200,8 @@ function ProductDetailContent() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleAddToCart}
-                  disabled={isOutOfStock}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold py-3 px-6 rounded-xl transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isOutOfStock || cartLoading}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold py-3 px-6 rounded-xl transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -207,7 +211,11 @@ function ProductDetailContent() {
                       d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
                     />
                   </svg>
-                  {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                  {cartLoading
+                    ? "Adding to Cart..."
+                    : isOutOfStock
+                    ? "Out of Stock"
+                    : "Add to Cart"}
                 </button>
 
                 <button
