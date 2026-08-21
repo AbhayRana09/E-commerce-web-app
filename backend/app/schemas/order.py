@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+from app.schemas.coupon import CouponOut
 
 class OrderStatusEnum(str, Enum):
     PENDING = "PENDING"
@@ -13,6 +14,15 @@ class OrderStatusEnum(str, Enum):
 
 class OrderStatusUpdate(BaseModel):
     status: OrderStatusEnum
+
+class OrderCreateIn(BaseModel):
+    address_id: int
+    coupon_code: Optional[str] = None
+    payment_method: str = Field("MOCK_CARD")
+
+class OrderSimulatePaymentIn(BaseModel):
+    payment_method: str = Field("MOCK_CARD")
+    simulate_success: bool = True
 
 class OrderItemProductOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -58,15 +68,20 @@ class OrderOut(BaseModel):
     id: int
     user_id: int
     address_id: int
+    coupon_id: Optional[int] = None
     status: OrderStatusEnum
+    payment_method: str
+    payment_status: str
     subtotal: float
     shipping_cost: float
     discount: float
+    tax_amount: float
     total_amount: float
     created_at: datetime
     updated_at: datetime
     user: Optional[OrderUserOut] = None
     address: Optional[OrderAddressOut] = None
+    coupon: Optional[CouponOut] = None
     items: Optional[List[OrderItemOut]] = []
 
 class OrderPaginatedOut(BaseModel):
