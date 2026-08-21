@@ -22,7 +22,7 @@ import CheckoutSummaryCard from "@/components/checkout/CheckoutSummaryCard";
 function CheckoutContent() {
   const router = useRouter();
   const { user } = useAuth();
-  const { cart, items, subtotal, refreshCart } = useCart();
+  const { cart, items, subtotal, loading: cartLoading, refreshCart } = useCart();
   const { showToast } = useToast();
 
   // Wizard Step State: 1 = Address, 2 = Review, 3 = Payment
@@ -354,7 +354,18 @@ function CheckoutContent() {
     }
   };
 
-  if (!cart || items.length === 0) {
+  if (cartLoading && !cart) {
+    return (
+      <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+        <div className="max-w-md mx-auto space-y-4 bg-slate-900/60 p-8 rounded-3xl border border-slate-800 shadow-xl backdrop-blur-md">
+          <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm font-semibold text-slate-300">Loading your checkout details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!cartLoading && (!cart || items.length === 0)) {
     return (
       <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <div className="max-w-xl mx-auto space-y-5 bg-slate-900/60 p-10 sm:p-12 rounded-3xl border border-slate-800 shadow-2xl backdrop-blur-md">
