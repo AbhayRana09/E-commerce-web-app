@@ -26,6 +26,11 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum DiscountType {
+  FIXED
+  PERCENTAGE
+}
+
 // ----------------------------------------------------
 // MODELS
 // ----------------------------------------------------
@@ -40,7 +45,6 @@ model User {
   is_verified   Boolean    @default(false)
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
-
 
   addresses     Address[]
   cart          Cart?
@@ -134,20 +138,43 @@ model CartItem {
   @@map("cart_items")
 }
 
+model Coupon {
+  id               Int          @id @default(autoincrement())
+  code             String       @unique
+  description      String?
+  discount_type    DiscountType @default(PERCENTAGE)
+  discount_value   Float
+  min_order_amount Float        @default(0.0)
+  is_active        Boolean      @default(true)
+  starts_at        DateTime?
+  expires_at       DateTime?
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+
+  orders Order[]
+
+  @@map("coupons")
+}
+
 model Order {
-  id            Int         @id @default(autoincrement())
-  user_id       Int
-  address_id    Int
-  status        OrderStatus @default(PENDING)
-  subtotal      Float
-  shipping_cost Float       @default(0.0)
-  discount      Float       @default(0.0)
-  total_amount  Float
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @updatedAt
+  id             Int         @id @default(autoincrement())
+  user_id        Int
+  address_id     Int
+  coupon_id      Int?
+  status         OrderStatus @default(PENDING)
+  payment_method String      @default("MOCK_CARD")
+  payment_status String      @default("PENDING")
+  subtotal       Float
+  shipping_cost  Float       @default(0.0)
+  discount       Float       @default(0.0)
+  tax_amount     Float       @default(0.0)
+  total_amount   Float
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
 
   user    User        @relation(fields: [user_id], references: [id])
   address Address     @relation(fields: [address_id], references: [id])
+  coupon  Coupon?     @relation(fields: [coupon_id], references: [id])
   items   OrderItem[]
 
   @@index([user_id])

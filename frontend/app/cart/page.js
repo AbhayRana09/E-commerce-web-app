@@ -262,7 +262,7 @@ function CartContent() {
           </div>
 
           <button
-            onClick={() => router.push("/orders")}
+            onClick={() => router.push("/checkout")}
             disabled={items.length === 0 || loading}
             className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
           >

@@ -236,7 +236,7 @@ function NavbarContent() {
                     </Link>
                   )}
 
-                  {/* My Profile Link (Contains Profile, Security & Saved Addresses tabs) */}
+                  {/* My Profile Link */}
                   <Link
                     href="/profile"
                     onClick={() => setDropdownOpen(false)}
@@ -246,6 +246,18 @@ function NavbarContent() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     My Profile
+                  </Link>
+
+                  {/* My Orders Link */}
+                  <Link
+                    href="/orders"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/70 transition"
+                  >
+                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    My Orders
                   </Link>
 
                   <div className="my-1 border-t border-slate-800/80"></div>
