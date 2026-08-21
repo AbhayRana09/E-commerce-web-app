@@ -148,16 +148,36 @@ function NavbarContent() {
         {/* Navigation Links & User Menu */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {!isAdminRoute && !isSuperAdmin && (
-            <Link
-              href="/"
-              className={`text-xs sm:text-sm font-semibold transition px-2.5 sm:px-3 py-1.5 rounded-xl ${
-                pathname === "/"
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-300 hover:text-white hover:bg-slate-800/60"
-              }`}
-            >
-              Home
-            </Link>
+            <>
+              <Link
+                href="/"
+                className={`text-xs sm:text-sm font-semibold transition px-2.5 sm:px-3 py-1.5 rounded-xl ${
+                  pathname === "/"
+                    ? "bg-slate-800 text-white"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                }`}
+              >
+                Home
+              </Link>
+              <Link
+                href="/cart"
+                className={`relative flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition px-2.5 sm:px-3 py-1.5 rounded-xl ${
+                  pathname === "/cart"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                </svg>
+                <span>Cart</span>
+                {totalItems > 0 && (
+                  <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow-sm ml-0.5 animate-in zoom-in-75 duration-200">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+            </>
           )}
 
           {user ? (
