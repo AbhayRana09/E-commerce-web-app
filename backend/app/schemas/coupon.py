@@ -8,7 +8,7 @@ class DiscountTypeEnum(str, Enum):
     FIXED = "FIXED"
 
 class CouponCreate(BaseModel):
-    code: str = Field(..., min_length=2, max_length=30, description="Coupon code, e.g. SUMMER25")
+    code: str = Field(..., min_length=2, max_length=20, description="Coupon code, e.g. SUMMER25")
     description: Optional[str] = Field(None, max_length=255)
     discount_type: DiscountTypeEnum = Field(DiscountTypeEnum.PERCENTAGE)
     discount_value: float = Field(..., gt=0, description="Percentage (e.g. 10) or Flat Amount (e.g. 20)")
@@ -23,7 +23,7 @@ class CouponCreate(BaseModel):
         return v.strip().upper()
 
 class CouponUpdate(BaseModel):
-    code: Optional[str] = Field(None, min_length=2, max_length=30)
+    code: Optional[str] = Field(None, min_length=2, max_length=20)
     description: Optional[str] = None
     discount_type: Optional[DiscountTypeEnum] = None
     discount_value: Optional[float] = Field(None, gt=0)

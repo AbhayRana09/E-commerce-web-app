@@ -157,13 +157,14 @@ model Coupon {
 }
 
 model Order {
-  id             Int         @id @default(autoincrement())
-  user_id        Int
-  address_id     Int
-  coupon_id      Int?
-  status         OrderStatus @default(PENDING)
-  payment_method String      @default("MOCK_CARD")
-  payment_status String      @default("PENDING")
+  id                  Int          @id @default(autoincrement())
+  user_id             Int
+  address_id          Int
+  coupon_id           Int?
+  status              OrderStatus  @default(PENDING)
+  cancellation_reason String?
+  payment_method      String       @default("MOCK_CARD")
+  payment_status      String       @default("PENDING")
   subtotal       Float
   shipping_cost  Float       @default(0.0)
   discount       Float       @default(0.0)

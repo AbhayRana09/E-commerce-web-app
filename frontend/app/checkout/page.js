@@ -22,7 +22,7 @@ import CheckoutSummaryCard from "@/components/checkout/CheckoutSummaryCard";
 function CheckoutContent() {
   const router = useRouter();
   const { user } = useAuth();
-  const { cart, items, subtotal, loading: cartLoading, refreshCart } = useCart();
+  const { cart, items, subtotal, refreshCart } = useCart();
   const { showToast } = useToast();
 
   // Wizard Step State: 1 = Address, 2 = Review, 3 = Payment
@@ -68,6 +68,18 @@ function CheckoutContent() {
   const [paymentMethod, setPaymentMethod] = useState("MOCK_CARD");
   const [processingOrder, setProcessingOrder] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
+  const [pendingOrderId, setPendingOrderId] = useState(null);
+  const [savedSnapshot, setSavedSnapshot] = useState({ items: [], subtotal: 0 });
+
+  // Sync snapshot whenever cart has items
+  useEffect(() => {
+    if (items && items.length > 0) {
+      setSavedSnapshot({ items, subtotal });
+    }
+  }, [items, subtotal]);
+
+  const activeItems = items && items.length > 0 ? items : savedSnapshot.items;
+  const activeSubtotal = items && items.length > 0 ? subtotal : savedSnapshot.subtotal;
 
   // Memoized country, state, and city datasets
   const allCountries = useMemo(() => Country.getAllCountries(), []);
@@ -90,6 +102,8 @@ function CheckoutContent() {
         errs.street = "Street address is required.";
       } else if (newAddress.street.trim().length < 5) {
         errs.street = "Street address must be at least 5 characters.";
+      } else if (newAddress.street.trim().length > 80) {
+        errs.street = "Street address cannot exceed 80 characters.";
       }
     }
     if (touched.country && (!newAddress.country || !newAddress.country.trim())) {
@@ -135,7 +149,6 @@ function CheckoutContent() {
       const offers = await getActiveOffers();
       setAvailableOffers(offers || []);
     } catch (err) {
-      // Non-blocking error for promo offers
       console.warn("Could not load promotional offers:", err);
     } finally {
       setLoadingOffers(false);
@@ -150,16 +163,16 @@ function CheckoutContent() {
   // Open Add Address Modal
   const handleOpenAddModal = () => {
     setEditingAddrId(null);
+    setSelectedCountryCode("");
+    setSelectedStateCode("");
     setNewAddress({
       street: "",
       city: "",
       state: "",
       postal_code: "",
       country: "",
-      is_default: addresses.length === 0,
+      is_default: false,
     });
-    setSelectedCountryCode("");
-    setSelectedStateCode("");
     setTouched({
       street: false,
       country: false,
@@ -172,7 +185,7 @@ function CheckoutContent() {
 
   // Open Edit Address Modal
   const handleOpenEditModal = (addr, e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     setEditingAddrId(addr.id);
 
     const countryObj = allCountries.find(
@@ -183,15 +196,13 @@ function CheckoutContent() {
 
     let stateCode = "";
     if (countryCode) {
-      const states = State.getStatesOfCountry(countryCode);
-      const stateObj = states.find(
+      const statesInCountry = State.getStatesOfCountry(countryCode);
+      const stateObj = statesInCountry.find(
         (s) => s.name.toLowerCase() === (addr.state || "").toLowerCase()
       );
       stateCode = stateObj ? stateObj.isoCode : "";
-      setSelectedStateCode(stateCode);
-    } else {
-      setSelectedStateCode("");
     }
+    setSelectedStateCode(stateCode);
 
     setNewAddress({
       street: addr.street || "",
@@ -223,7 +234,18 @@ function CheckoutContent() {
     });
 
     if (Object.keys(addressErrors).length > 0) {
-      showToast("Please complete all required address fields.", "error");
+      showToast("Please correct the errors in the address form.", "error");
+      return;
+    }
+
+    if (
+      !newAddress.street.trim() ||
+      !newAddress.country.trim() ||
+      !newAddress.state.trim() ||
+      !newAddress.city.trim() ||
+      !newAddress.postal_code.trim()
+    ) {
+      showToast("All fields marked with an asterisk (*) are required.", "error");
       return;
     }
 
@@ -265,7 +287,7 @@ function CheckoutContent() {
 
     try {
       setValidatingCoupon(true);
-      const res = await validateCoupon(couponCodeInput.trim(), subtotal);
+      const res = await validateCoupon(couponCodeInput.trim(), activeSubtotal);
       setAppliedCoupon(res);
       showToast(res.message || `Coupon '${res.code}' applied!`, "success");
     } catch (err) {
@@ -280,7 +302,7 @@ function CheckoutContent() {
   const handleApplyOfferCode = async (code) => {
     try {
       setApplyingOfferCode(code);
-      const res = await validateCoupon(code, subtotal);
+      const res = await validateCoupon(code, activeSubtotal);
       setAppliedCoupon(res);
       setCouponCodeInput(code);
       showToast(`Offer '${code}' applied successfully!`, "success");
@@ -299,9 +321,9 @@ function CheckoutContent() {
   };
 
   // Order Totals Computations
-  const shippingCost = subtotal > 100 || subtotal === 0 ? 0.0 : 9.99;
+  const shippingCost = activeSubtotal > 100 || activeSubtotal === 0 ? 0.0 : 9.99;
   const discountAmount = appliedCoupon?.discount_amount ? Number(appliedCoupon.discount_amount) : 0.0;
-  const taxableAmount = Math.max(0, subtotal - discountAmount);
+  const taxableAmount = Math.max(0, activeSubtotal - discountAmount);
   const estimatedTax = taxableAmount * 0.08;
   const finalTotal = Math.max(0, taxableAmount + shippingCost + estimatedTax);
 
@@ -317,18 +339,24 @@ function CheckoutContent() {
       setProcessingOrder(true);
       setPaymentError(null);
 
-      // Step A: Create the Order in database
-      const orderPayload = {
-        address_id: selectedAddressId,
-        coupon_code: appliedCoupon ? appliedCoupon.code : null,
-        payment_method: paymentMethod,
-      };
+      let targetOrderId = pendingOrderId;
 
-      const createdOrder = await createOrder(orderPayload);
+      // Step A: Create the Order in database if not already created
+      if (!targetOrderId) {
+        const orderPayload = {
+          address_id: selectedAddressId,
+          coupon_code: appliedCoupon ? appliedCoupon.code : null,
+          payment_method: paymentMethod,
+        };
+
+        const createdOrder = await createOrder(orderPayload);
+        targetOrderId = createdOrder.id;
+        setPendingOrderId(createdOrder.id);
+      }
 
       // Step B: Process Payment
       if (paymentMethod !== "COD") {
-        const paymentRes = await simulateOrderPayment(createdOrder.id, {
+        const paymentRes = await simulateOrderPayment(targetOrderId, {
           payment_method: paymentMethod,
           simulate_success: simulateSuccess,
         });
@@ -339,13 +367,21 @@ function CheckoutContent() {
           await refreshCart();
           return;
         }
+      } else {
+        // If switching to COD on an existing pending order retry
+        if (pendingOrderId) {
+          await simulateOrderPayment(targetOrderId, {
+            payment_method: "COD",
+            simulate_success: true,
+          });
+        }
       }
 
       // Refresh global cart state to empty
       await refreshCart();
 
       showToast("Order placed successfully! Redirecting...", "success");
-      router.push(`/orders/confirmation?orderId=${createdOrder.id}`);
+      router.push(`/orders/confirmation?orderId=${targetOrderId}`);
     } catch (err) {
       setPaymentError(err.message || "An error occurred while creating your order.");
       showToast(err.message || "Order placement failed", "error");
@@ -354,31 +390,20 @@ function CheckoutContent() {
     }
   };
 
-  if (cartLoading && !cart) {
-    return (
-      <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <div className="max-w-md mx-auto space-y-4 bg-slate-900/60 p-8 rounded-3xl border border-slate-800 shadow-xl backdrop-blur-md">
-          <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-sm font-semibold text-slate-300">Loading your checkout details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!cartLoading && (!cart || items.length === 0)) {
+  if ((!cart || activeItems.length === 0) && !pendingOrderId) {
     return (
       <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <div className="max-w-xl mx-auto space-y-5 bg-slate-900/60 p-10 sm:p-12 rounded-3xl border border-slate-800 shadow-2xl backdrop-blur-md">
-          <div className="w-20 h-20 rounded-3xl bg-slate-950 text-slate-500 border border-slate-800 flex items-center justify-center mx-auto text-3xl">
+        <div className="max-w-xl mx-auto space-y-5 bg-[#ECE8DF] p-10 sm:p-12 rounded-3xl border border-[#DDD6C8] shadow-xs">
+          <div className="w-20 h-20 rounded-3xl bg-[#FFFFFF] text-stone-400 border border-[#D8D4CE] flex items-center justify-center mx-auto text-3xl shadow-xs">
             🛒
           </div>
-          <h2 className="text-2xl font-bold text-white">Your Cart is Empty</h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
+          <h2 className="text-2xl font-bold text-[#2C2A29]">Your Cart is Empty</h2>
+          <p className="text-sm text-stone-600 leading-relaxed">
             You don&apos;t have any items to checkout. Please add products to your shopping cart first.
           </p>
           <Link
             href="/"
-            className="inline-block mt-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-6 py-3 rounded-2xl transition shadow-lg shadow-indigo-600/25"
+            className="inline-block mt-2 bg-[#1E3A5F] hover:bg-[#152843] text-white text-sm font-semibold px-6 py-3 rounded-2xl transition shadow-xs"
           >
             Explore Catalog &rarr;
           </Link>
@@ -420,7 +445,7 @@ function CheckoutContent() {
           {currentStep === 2 && (
             <StepReviewCart
               selectedAddress={selectedAddress}
-              items={items}
+              items={activeItems}
               appliedCoupon={appliedCoupon}
               couponCodeInput={couponCodeInput}
               setCouponCodeInput={setCouponCodeInput}
@@ -429,7 +454,7 @@ function CheckoutContent() {
               handleRemoveCoupon={handleRemoveCoupon}
               availableOffers={availableOffers}
               loadingOffers={loadingOffers}
-              subtotal={subtotal}
+              subtotal={activeSubtotal}
               handleApplyOfferCode={handleApplyOfferCode}
               applyingOfferCode={applyingOfferCode}
               onBack={() => setCurrentStep(1)}
@@ -453,8 +478,8 @@ function CheckoutContent() {
 
         {/* Right 1 Col: Fixed Summary Breakdown */}
         <CheckoutSummaryCard
-          itemsCount={items.length}
-          subtotal={subtotal}
+          itemsCount={activeItems.length}
+          subtotal={activeSubtotal}
           shippingCost={shippingCost}
           discountAmount={discountAmount}
           appliedCoupon={appliedCoupon}

@@ -11,7 +11,7 @@ export async function createOrder(data) {
  * Fetch logged-in customer's order history
  */
 export async function getMyOrders() {
-  return await api.get("/api/orders/my");
+  return await api.get("/api/orders/my-orders");
 }
 
 /**
@@ -25,5 +25,14 @@ export async function getOrderById(orderId) {
  * Simulate payment for an order (Mock Card / UPI / COD)
  */
 export async function simulateOrderPayment(orderId, paymentData) {
-  return await api.post(`/api/orders/${orderId}/pay`, paymentData);
+  return await api.post(`/api/orders/${orderId}/simulate-payment`, paymentData);
+}
+
+/**
+ * Cancel an eligible order (PENDING or CONFIRMED status) and restore stock
+ */
+export async function cancelOrder(orderId, reason = "") {
+  return await api.patch(`/api/orders/${orderId}/cancel`, {
+    reason: reason ? reason.trim() : null,
+  });
 }

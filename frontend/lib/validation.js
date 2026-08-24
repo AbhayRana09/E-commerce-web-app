@@ -12,7 +12,7 @@ export const WHITESPACE_ABUSE_REGEX = /^\s|\s$|\s{2,}/;
  * Validates First Name
  * - Required
  * - No leading, trailing, or 2+ consecutive spaces
- * - Length: 2 - 50 characters
+ * - Length: 2 - 30 characters
  * - Only alphabetic characters and single spaces
  */
 export function validateFirstName(name) {
@@ -25,8 +25,8 @@ export function validateFirstName(name) {
   if (!NAME_REGEX.test(name)) {
     return "First name can only contain letters.";
   }
-  if (name.length < 2 || name.length > 50) {
-    return "First name must be between 2 and 50 characters.";
+  if (name.length < 2 || name.length > 30) {
+    return "First name must be between 2 and 30 characters.";
   }
   return "";
 }
@@ -35,7 +35,7 @@ export function validateFirstName(name) {
  * Validates Last Name
  * - Required
  * - No leading, trailing, or 2+ consecutive spaces
- * - Length: 1 - 50 characters
+ * - Length: 1 - 30 characters
  * - Only alphabetic characters and single spaces
  */
 export function validateLastName(name) {
@@ -48,8 +48,8 @@ export function validateLastName(name) {
   if (!NAME_REGEX.test(name)) {
     return "Last name can only contain letters.";
   }
-  if (name.length < 1 || name.length > 50) {
-    return "Last name must be between 1 and 50 characters.";
+  if (name.length < 1 || name.length > 30) {
+    return "Last name must be between 1 and 30 characters.";
   }
   return "";
 }
@@ -144,12 +144,12 @@ export function validateConfirmPassword(confirmPassword, targetPassword) {
 }
 
 /**
- * Validates Profile Image MIME Type
+ * Validates Product / Profile Image MIME Type and Size (Max 5MB)
  */
 export function validateProfileImage(file) {
   if (!file) return "";
   if (!file.type || !file.type.startsWith("image/")) {
-    return "Only image files (JPEG, PNG, WEBP, etc.) are allowed.";
+    return "Only image files (JPEG, PNG, WEBP, GIF, etc.) are allowed.";
   }
   if (file.size > 5 * 1024 * 1024) {
     return "Image size cannot exceed 5MB.";
@@ -157,10 +157,12 @@ export function validateProfileImage(file) {
   return "";
 }
 
+export const validateProductImage = validateProfileImage;
+
 /**
  * Validates Category Name
  * - Required
- * - Length: 2 - 50 characters
+ * - Length: 2 - 30 characters
  */
 export function validateCategoryName(name) {
   if (!name || name.trim().length === 0) {
@@ -170,8 +172,8 @@ export function validateCategoryName(name) {
   if (trimmed.length < 2) {
     return "Category name must be at least 2 characters.";
   }
-  if (trimmed.length > 50) {
-    return "Category name cannot exceed 50 characters.";
+  if (trimmed.length > 30) {
+    return "Category name cannot exceed 30 characters.";
   }
   return "";
 }

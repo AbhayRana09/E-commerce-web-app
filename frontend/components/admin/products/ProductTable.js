@@ -6,38 +6,47 @@ export default function ProductTable({
   products = [],
   loading = false,
   onToggleActive,
+  onToggleStatus,
   onEdit,
+  onEditProduct,
   onDelete,
+  onDeleteProduct,
   onAddFirst,
 }) {
+  const handleToggle = onToggleActive || onToggleStatus;
+  const handleEdit = onEdit || onEditProduct;
+  const handleDelete = onDelete || onDeleteProduct;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-3 border-[#1E3A5F] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-16 bg-slate-900/40 rounded-2xl border border-slate-800">
-        <p className="text-slate-400 text-sm">
+      <div className="text-center py-16 bg-[#ECE8DF] rounded-2xl border border-[#DDD6C8] shadow-xs">
+        <p className="text-stone-600 text-sm">
           No products found matching criteria.
         </p>
-        <button
-          onClick={onAddFirst}
-          className="mt-3 text-indigo-400 hover:text-indigo-300 text-xs font-semibold cursor-pointer"
-        >
-          Add a new product &rarr;
-        </button>
+        {onAddFirst && (
+          <button
+            onClick={onAddFirst}
+            className="mt-3 text-[#1E3A5F] hover:text-[#152843] text-xs font-semibold cursor-pointer"
+          >
+            Add a new product &rarr;
+          </button>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto bg-slate-900/60 rounded-2xl border border-slate-800">
-      <table className="w-full text-left text-xs text-slate-300">
-        <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-800 tracking-wider">
+    <div className="overflow-x-auto bg-[#ECE8DF] rounded-2xl border border-[#DDD6C8] shadow-xs">
+      <table className="w-full text-left text-xs text-[#2C2A29]">
+        <thead className="bg-[#ECE8DF] text-stone-500 uppercase text-[10px] font-semibold border-b border-[#DDD6C8] tracking-wider">
           <tr>
             <th className="px-4 py-3.5">Product</th>
             <th className="px-4 py-3.5">Category</th>
@@ -47,16 +56,16 @@ export default function ProductTable({
             <th className="px-4 py-3.5 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800/60">
+        <tbody className="divide-y divide-[#DDD6C8]">
           {products.map((product) => (
             <tr
               key={product.id}
-              className="hover:bg-slate-800/30 transition duration-150"
+              className="hover:bg-[#FFFFFF] transition duration-150"
             >
               {/* Thumbnail & Title */}
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-slate-950 border border-slate-800 overflow-hidden shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-[#FFFFFF] border border-[#D8D4CE] overflow-hidden shrink-0 shadow-xs">
                     {product.image_url ? (
                       <img
                         src={product.image_url}
@@ -67,16 +76,16 @@ export default function ProductTable({
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[9px] text-slate-600">
+                      <div className="w-full h-full flex items-center justify-center text-[9px] text-stone-400">
                         No Img
                       </div>
                     )}
                   </div>
-                  <div className="max-w-xs">
-                    <p className="font-semibold text-slate-100 line-clamp-1 break-words">
+                  <div className="max-w-xs min-w-0">
+                    <p className="font-semibold text-[#2C2A29] line-clamp-1 break-words [overflow-wrap:anywhere]">
                       {product.name}
                     </p>
-                    <p className="text-[11px] text-slate-500 font-mono truncate">
+                    <p className="text-[11px] text-stone-500 font-mono truncate">
                       /{product.slug}
                     </p>
                   </div>
@@ -85,13 +94,13 @@ export default function ProductTable({
 
               {/* Category */}
               <td className="px-4 py-3">
-                <span className="bg-slate-800 text-indigo-300 font-medium px-2.5 py-1 rounded-full text-[11px] border border-slate-700/60 inline-block max-w-[140px] truncate">
+                <span className="bg-[#FFFFFF] text-[#1E3A5F] font-medium px-2.5 py-1 rounded-full text-[11px] border border-[#D8D4CE] inline-block max-w-[140px] truncate shadow-xs">
                   {product.category?.name || "Uncategorized"}
                 </span>
               </td>
 
               {/* Price */}
-              <td className="px-4 py-3 font-semibold text-slate-100">
+              <td className="px-4 py-3 font-semibold text-[#2C2A29] font-mono">
                 {formatCurrency(product.price)}
               </td>
 
@@ -100,10 +109,10 @@ export default function ProductTable({
                 <span
                   className={`font-semibold ${
                     product.stock_quantity > 10
-                      ? "text-slate-200"
+                      ? "text-stone-800"
                       : product.stock_quantity > 0
-                      ? "text-amber-400"
-                      : "text-red-400"
+                      ? "text-amber-700"
+                      : "text-red-700"
                   }`}
                 >
                   {product.stock_quantity} units
@@ -113,11 +122,11 @@ export default function ProductTable({
               {/* Status Toggle */}
               <td className="px-4 py-3 w-28 shrink-0">
                 <button
-                  onClick={() => onToggleActive(product)}
+                  onClick={() => handleToggle && handleToggle(product)}
                   className={`w-24 inline-flex items-center justify-center px-2.5 py-1 rounded-full text-[11px] font-semibold border transition cursor-pointer shrink-0 ${
                     product.is_active
-                      ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20"
-                      : "bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                      : "bg-[#FFFFFF] text-stone-500 border-[#D8D4CE] hover:bg-[#ECE8DF]"
                   }`}
                 >
                   {product.is_active ? "● Active" : "○ Inactive"}
@@ -128,14 +137,14 @@ export default function ProductTable({
               <td className="px-4 py-3 text-right">
                 <div className="flex items-center justify-end gap-2">
                   <button
-                    onClick={() => onEdit(product)}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-slate-700/60 transition cursor-pointer"
+                    onClick={() => handleEdit && handleEdit(product)}
+                    className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-[#D8D4CE] transition cursor-pointer shadow-xs"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => onDelete(product)}
-                    className="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-red-500/30 transition cursor-pointer"
+                    onClick={() => handleDelete && handleDelete(product)}
+                    className="bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-red-200 transition cursor-pointer"
                   >
                     Delete
                   </button>

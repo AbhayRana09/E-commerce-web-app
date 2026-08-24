@@ -110,7 +110,10 @@ export default function AdminProductsPage() {
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);
-    setFormData(initialForm);
+    setFormData({
+      ...initialForm,
+      category_id: categories.length > 0 ? categories[0].id.toString() : "",
+    });
     setTouched({
       name: false,
       category_id: false,
@@ -126,9 +129,9 @@ export default function AdminProductsPage() {
     setEditingProduct(product);
     setFormData({
       name: product.name || "",
-      category_id: product.category_id?.toString() || "",
-      price: product.price?.toString() || "",
-      stock_quantity: product.stock_quantity?.toString() || "",
+      category_id: product.category_id?.toString() || product.category?.id?.toString() || "",
+      price: product.price !== undefined ? product.price.toString() : "",
+      stock_quantity: product.stock_quantity !== undefined ? product.stock_quantity.toString() : "",
       image_url: product.image_url || "",
       description: product.description || "",
       is_active: product.is_active ?? true,
@@ -148,9 +151,9 @@ export default function AdminProductsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validation = validateProfileImage(file);
-    if (!validation.isValid) {
-      showToast(validation.error, "error");
+    const errorMsg = validateProfileImage(file);
+    if (errorMsg) {
+      showToast(errorMsg, "error");
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -158,7 +161,7 @@ export default function AdminProductsPage() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setFormData((prev) => ({ ...prev, image_url: reader.result }));
-      showToast("Image selected successfully", "success");
+      showToast("Image loaded successfully!", "success");
     };
     reader.readAsDataURL(file);
   };
@@ -217,7 +220,7 @@ export default function AdminProductsPage() {
         price: parseFloat(formData.price),
         stock_quantity: parseInt(formData.stock_quantity, 10),
         description: formData.description.trim(),
-        image_url: formData.image_url.trim() || null,
+        image_url: formData.image_url?.trim() || null,
         is_active: formData.is_active,
       };
 
@@ -231,7 +234,7 @@ export default function AdminProductsPage() {
 
       setShowSaveConfirm(false);
       setIsModalOpen(false);
-      loadData();
+      await loadData();
     } catch (err) {
       showToast(err.message || "Failed to save product", "error");
     } finally {
@@ -242,12 +245,15 @@ export default function AdminProductsPage() {
   const executeDelete = async () => {
     if (!productToDelete) return;
     try {
+      setSubmitting(true);
       await deleteProduct(productToDelete.id);
-      showToast("Product deleted successfully!", "success");
+      showToast(`Product "${productToDelete.name}" deleted successfully!`, "success");
       setProductToDelete(null);
-      loadData();
+      await loadData();
     } catch (err) {
       showToast(err.message || "Failed to delete product", "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -266,14 +272,14 @@ export default function AdminProductsPage() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Products Management</h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-[#2C2A29] tracking-tight">Products Management</h1>
+          <p className="text-sm text-stone-600 mt-1">
             Create, update stock, manage visibility and curate items in your catalogue.
           </p>
         </div>
         <button
           onClick={handleOpenAddModal}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+          className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-xs flex items-center gap-2 self-start sm:self-auto cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -296,14 +302,19 @@ export default function AdminProductsPage() {
         loading={loading}
         products={filteredProducts}
         categories={categories}
+        onToggleActive={handleToggleStatus}
         onToggleStatus={handleToggleStatus}
+        onEdit={handleOpenEditModal}
         onEditProduct={handleOpenEditModal}
+        onDelete={(p) => setProductToDelete(p)}
         onDeleteProduct={(p) => setProductToDelete(p)}
+        onAddFirst={handleOpenAddModal}
       />
 
       {/* Create / Edit Modal */}
       <ProductFormModal
         open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onOpenChange={setIsModalOpen}
         editingProduct={editingProduct}
         formData={formData}
@@ -327,6 +338,7 @@ export default function AdminProductsPage() {
         title="Delete Product"
         message={`Are you sure you want to permanently delete "${productToDelete?.name}"? This action cannot be undone.`}
         actionType="delete"
+        submitting={submitting}
         onConfirm={executeDelete}
       />
 
@@ -337,6 +349,7 @@ export default function AdminProductsPage() {
         title="Save Changes"
         message={`Are you sure you want to save the changes for "${editingProduct?.name}"?`}
         actionType="save"
+        submitting={submitting}
         onConfirm={executeSave}
       />
     </div>

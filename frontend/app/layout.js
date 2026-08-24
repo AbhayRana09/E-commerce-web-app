@@ -2,6 +2,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import Navbar from "@/components/Navbar";
 
 export const metadata = {
@@ -12,14 +13,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white antialiased">
+      <body className="bg-[#F7F5F0] text-[#2C2A29] min-h-screen flex flex-col font-sans selection:bg-[#1E3A5F] selection:text-white antialiased">
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
-              <Navbar />
-              <main className="flex-1 w-full max-w-[1700px] mx-auto p-4 sm:p-6 lg:p-8">
-                {children}
-              </main>
+              <WishlistProvider>
+                <Navbar />
+                <main className="flex-1 w-full max-w-[1700px] mx-auto p-4 sm:p-6 lg:p-8">
+                  {children}
+                </main>
+              </WishlistProvider>
             </CartProvider>
           </AuthProvider>
         </ToastProvider>
@@ -27,6 +30,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
-
-

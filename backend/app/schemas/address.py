@@ -4,20 +4,20 @@ from datetime import datetime
 from typing import Optional
 
 def validate_postal_code(postal_code: str) -> str:
-    """Validates postal code format using regex."""
+    """Validates postal code format using regex (3 to 10 alphanumeric characters, hyphens, spaces)."""
     clean = postal_code.strip()
-    if not re.match(r"^[a-zA-Z0-9\s\-]{3,15}$", clean):
-        raise ValueError("Invalid postal code format.")
+    if not re.match(r"^[a-zA-Z0-9\s\-]{3,10}$", clean):
+        raise ValueError("Invalid postal code format. Must be 3 to 10 alphanumeric characters.")
     return clean
 
 class AddressCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    street: str = Field(..., min_length=1, max_length=150)
+    street: str = Field(..., min_length=5, max_length=80)
     city: str = Field(..., min_length=1, max_length=50)
     state: str = Field(..., min_length=1, max_length=50)
-    postal_code: str = Field(..., min_length=3, max_length=15)
-    country: str = Field(..., min_length=2, max_length=60)
+    postal_code: str = Field(..., min_length=3, max_length=10)
+    country: str = Field(..., min_length=2, max_length=50)
     is_default: Optional[bool] = False
 
     @field_validator("street", "city", "state", "country", mode="before")
@@ -36,11 +36,11 @@ class AddressCreate(BaseModel):
 class AddressUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    street: Optional[str] = Field(None, min_length=1, max_length=150)
+    street: Optional[str] = Field(None, min_length=5, max_length=80)
     city: Optional[str] = Field(None, min_length=1, max_length=50)
     state: Optional[str] = Field(None, min_length=1, max_length=50)
-    postal_code: Optional[str] = Field(None, min_length=3, max_length=15)
-    country: Optional[str] = Field(None, min_length=2, max_length=60)
+    postal_code: Optional[str] = Field(None, min_length=3, max_length=10)
+    country: Optional[str] = Field(None, min_length=2, max_length=50)
     is_default: Optional[bool] = None
 
     @field_validator("street", "city", "state", "country", mode="before")

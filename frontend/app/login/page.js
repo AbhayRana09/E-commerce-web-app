@@ -16,7 +16,6 @@ import RouteGuard from "@/components/RouteGuard";
 import { PasswordToggleButton } from "@/components/ui/EyeIcons";
 
 function LoginContent() {
-
   const { login } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
@@ -35,7 +34,6 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [isUnverified, setIsUnverified] = useState(false);
   const [resending, setResending] = useState(false);
-
 
   // Ref-based submission lock for double-submit prevention
   const isSubmittingRef = useRef(false);
@@ -61,7 +59,6 @@ function LoginContent() {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
-
 
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -109,7 +106,6 @@ function LoginContent() {
       autoFocusFirstError(errors, domRefs);
       return;
     }
-
 
     isSubmittingRef.current = true;
     setLoading(true);
@@ -162,7 +158,6 @@ function LoginContent() {
     const interval = setInterval(async () => {
       if (!formData.email || errors.email) return;
       try {
-        // Test resend endpoint: if user is already verified, backend returns 200 with "already verified" message
         const res = await api.post("/api/auth/resend-verification", {
           email: formData.email.trim().toLowerCase(),
         });
@@ -185,12 +180,11 @@ function LoginContent() {
     };
   }, [isUnverified, formData.email, formData.password, errors.email, executeLogin, showToast]);
 
-
   return (
-    <div className="max-w-md mx-auto my-6 sm:my-10 p-6 sm:p-8 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl">
+    <div className="max-w-md mx-auto my-6 sm:my-10 p-6 sm:p-8 bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl shadow-xs">
       <div className="text-center mb-6 space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Log In</h1>
-        <p className="text-slate-400 text-sm">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#2C2A29] tracking-tight">Log In</h1>
+        <p className="text-stone-600 text-sm">
           Enter your email and password to access your account.
         </p>
       </div>
@@ -200,9 +194,9 @@ function LoginContent() {
         <div>
           <label
             htmlFor="login_email"
-            className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
+            className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5"
           >
-            Email Address <span className="text-red-400">*</span>
+            Email Address <span className="text-red-500">*</span>
           </label>
           <input
             id="login_email"
@@ -215,14 +209,15 @@ function LoginContent() {
             onBlur={() => handleBlur("email")}
             placeholder="Email Address"
             autoComplete="email"
-            className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:outline-none transition ${touched.email && errors.email
-                ? "border-red-500 focus:border-red-500 bg-red-950/10"
+            className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-3 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition shadow-xs ${
+              touched.email && errors.email
+                ? "border-red-500 focus:border-red-500 bg-red-50"
                 : touched.email && !errors.email && formData.email
-                  ? "border-emerald-500/80 focus:border-emerald-500"
-                  : "border-slate-800 focus:border-indigo-500"
-              }`}
+                ? "border-emerald-500/80 focus:border-emerald-500"
+                : "border-[#D8D4CE] focus:border-[#1E3A5F]"
+            }`}
           />
-          <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
+          <div className="h-5 mt-1 text-xs text-red-500 font-medium leading-5">
             {touched.email && errors.email ? errors.email : "\u00A0"}
           </div>
         </div>
@@ -231,9 +226,9 @@ function LoginContent() {
         <div>
           <label
             htmlFor="login_password"
-            className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
+            className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5"
           >
-            Password <span className="text-red-400">*</span>
+            Password <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -247,10 +242,11 @@ function LoginContent() {
               onBlur={() => handleBlur("password")}
               placeholder="Password"
               autoComplete="current-password"
-              className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:outline-none transition pr-16 ${touched.password && errors.password
-                  ? "border-red-500 focus:border-red-500 bg-red-950/10"
-                  : "border-slate-800 focus:border-indigo-500"
-                }`}
+              className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-3 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition pr-16 shadow-xs ${
+                touched.password && errors.password
+                  ? "border-red-500 focus:border-red-500 bg-red-50"
+                  : "border-[#D8D4CE] focus:border-[#1E3A5F]"
+              }`}
             />
 
             <PasswordToggleButton
@@ -259,15 +255,14 @@ function LoginContent() {
               ariaLabel={showPassword ? "Hide password" : "Show password"}
             />
           </div>
-          <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
+          <div className="h-5 mt-1 text-xs text-red-500 font-medium leading-5">
             {touched.password && errors.password ? errors.password : "\u00A0"}
           </div>
-
 
           <div className="mt-2 text-right">
             <Link
               href="/forgot-password"
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition"
+              className="text-xs text-[#1E3A5F] hover:text-[#152843] font-medium transition"
             >
               Forgot Password?
             </Link>
@@ -277,21 +272,21 @@ function LoginContent() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold py-3 rounded-xl transition shadow-md shadow-indigo-600/20 cursor-pointer mt-2"
+          className="w-full bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-40 text-white font-semibold py-3 rounded-xl transition shadow-xs cursor-pointer mt-2"
         >
           {loading ? "Logging in..." : "Log In"}
         </button>
       </form>
 
-      {/* Simple Shadcn UI Dialog Modal for Unverified Accounts */}
+      {/* Simple Dialog Modal for Unverified Accounts */}
       {isUnverified && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[#F7F5F0] border border-[#DDD6C8] rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
             <div className="space-y-1.5">
-              <h3 className="text-lg font-bold text-white tracking-tight">
+              <h3 className="text-lg font-bold text-[#2C2A29] tracking-tight">
                 Verify Your Email
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-stone-600 leading-relaxed">
                 Please check your inbox and verify your email address before logging in.
               </p>
             </div>
@@ -301,7 +296,7 @@ function LoginContent() {
                 type="button"
                 onClick={handleResendVerification}
                 disabled={resending}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl transition text-xs cursor-pointer disabled:opacity-50"
+                className="w-full bg-[#1E3A5F] hover:bg-[#152843] text-white font-medium py-2.5 rounded-xl transition text-xs cursor-pointer disabled:opacity-50"
               >
                 {resending ? "Sending Email..." : "Resend Verification Email"}
               </button>
@@ -309,7 +304,7 @@ function LoginContent() {
               <button
                 type="button"
                 onClick={() => setIsUnverified(false)}
-                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 rounded-xl transition text-xs cursor-pointer"
+                className="w-full bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] font-medium py-2 rounded-xl transition text-xs cursor-pointer border border-[#D8D4CE] shadow-xs"
               >
                 Close
               </button>
@@ -318,11 +313,9 @@ function LoginContent() {
         </div>
       )}
 
-
-
-      <div className="text-center mt-8 pt-6 border-t border-slate-800 text-sm text-slate-400">
+      <div className="text-center mt-8 pt-6 border-t border-[#DDD6C8] text-sm text-stone-600">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">
+        <Link href="/register" className="text-[#1E3A5F] hover:text-[#152843] font-semibold transition">
           Create an account
         </Link>
       </div>
@@ -337,5 +330,3 @@ export default function LoginPage() {
     </RouteGuard>
   );
 }
-
-

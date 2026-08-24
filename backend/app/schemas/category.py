@@ -3,11 +3,11 @@ from typing import Optional
 from datetime import datetime
 
 class CategoryCreate(BaseModel):
-    name: str = Field(..., min_length=2, max_length=50, description="Category name (2 to 50 characters)")
+    name: str = Field(..., min_length=2, max_length=30, description="Category name (2 to 30 characters)")
     description: Optional[str] = Field(None, max_length=300, description="Category description (maximum 300 characters)")
 
 class CategoryUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=2, max_length=50, description="Category name (2 to 50 characters)")
+    name: Optional[str] = Field(None, min_length=2, max_length=30, description="Category name (2 to 30 characters)")
     description: Optional[str] = Field(None, max_length=300, description="Category description (maximum 300 characters)")
 
 class CategoryOut(BaseModel):

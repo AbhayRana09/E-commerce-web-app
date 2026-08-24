@@ -2,7 +2,7 @@
 
 export default function CheckoutStepper({ currentStep, onStepClick, canNavigateToStep }) {
   return (
-    <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl backdrop-blur-md">
+    <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl p-4 sm:p-5 shadow-xs">
       <div className="flex items-center justify-between max-w-2xl mx-auto">
         {/* Step 1 */}
         <button
@@ -13,15 +13,15 @@ export default function CheckoutStepper({ currentStep, onStepClick, canNavigateT
           <div
             className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition ${
               currentStep >= 1
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/30"
-                : "bg-slate-800 text-slate-500"
+                ? "bg-[#1E3A5F] text-white shadow-xs"
+                : "bg-[#FFFFFF] text-stone-400 border border-[#D8D4CE]"
             }`}
           >
             1
           </div>
           <span
             className={`text-xs sm:text-sm font-semibold hidden sm:inline ${
-              currentStep >= 1 ? "text-slate-100" : "text-slate-500"
+              currentStep >= 1 ? "text-[#2C2A29]" : "text-stone-500"
             }`}
           >
             Delivery Address
@@ -30,7 +30,7 @@ export default function CheckoutStepper({ currentStep, onStepClick, canNavigateT
 
         <div
           className={`h-0.5 flex-1 mx-4 transition-colors ${
-            currentStep >= 2 ? "bg-indigo-600" : "bg-slate-800"
+            currentStep >= 2 ? "bg-[#1E3A5F]" : "bg-[#DDD6C8]"
           }`}
         />
 
@@ -44,15 +44,15 @@ export default function CheckoutStepper({ currentStep, onStepClick, canNavigateT
           <div
             className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition ${
               currentStep >= 2
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/30"
-                : "bg-slate-800 text-slate-500"
+                ? "bg-[#1E3A5F] text-white shadow-xs"
+                : "bg-[#FFFFFF] text-stone-400 border border-[#D8D4CE]"
             }`}
           >
             2
           </div>
           <span
             className={`text-xs sm:text-sm font-semibold hidden sm:inline ${
-              currentStep >= 2 ? "text-slate-100" : "text-slate-500"
+              currentStep >= 2 ? "text-[#2C2A29]" : "text-stone-500"
             }`}
           >
             Review & Offers
@@ -61,7 +61,7 @@ export default function CheckoutStepper({ currentStep, onStepClick, canNavigateT
 
         <div
           className={`h-0.5 flex-1 mx-4 transition-colors ${
-            currentStep >= 3 ? "bg-indigo-600" : "bg-slate-800"
+            currentStep >= 3 ? "bg-[#1E3A5F]" : "bg-[#DDD6C8]"
           }`}
         />
 
@@ -75,15 +75,15 @@ export default function CheckoutStepper({ currentStep, onStepClick, canNavigateT
           <div
             className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition ${
               currentStep === 3
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/30"
-                : "bg-slate-800 text-slate-500"
+                ? "bg-[#1E3A5F] text-white shadow-xs"
+                : "bg-[#FFFFFF] text-stone-400 border border-[#D8D4CE]"
             }`}
           >
             3
           </div>
           <span
             className={`text-xs sm:text-sm font-semibold hidden sm:inline ${
-              currentStep === 3 ? "text-slate-100" : "text-slate-500"
+              currentStep === 3 ? "text-[#2C2A29]" : "text-stone-500"
             }`}
           >
             Payment

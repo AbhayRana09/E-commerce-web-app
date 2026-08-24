@@ -127,20 +127,20 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
   return (
     <>
       <Dialog open={open} onOpenChange={(val) => { if (!val) handleClose(); else onOpenChange(true); }}>
-        <DialogContent className="max-w-lg w-[95vw] p-6 sm:p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
-          <DialogHeader className="border-b border-slate-800 pb-4 flex flex-row items-center justify-between text-left">
+        <DialogContent className="max-w-lg w-[95vw] p-6 sm:p-8 bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl shadow-2xl">
+          <DialogHeader className="border-b border-[#DDD6C8] pb-4 flex flex-row items-center justify-between text-left">
             <div>
-              <DialogTitle className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-[#2C2A29] tracking-tight flex items-center gap-2">
                 <span>🔑</span> Change Password
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-400 mt-0.5">
+              <DialogDescription className="text-xs text-stone-600 mt-0.5">
                 Enter your current password and choose a secure new one.
               </DialogDescription>
             </div>
             <button
               type="button"
               onClick={handleClose}
-              className="text-slate-400 hover:text-white text-sm p-1.5 rounded-full hover:bg-slate-800 transition cursor-pointer"
+              className="text-stone-400 hover:text-[#2C2A29] text-sm p-1.5 rounded-full hover:bg-[#ECE8DF] transition cursor-pointer"
             >
               ✕
             </button>
@@ -151,9 +151,9 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
             <div>
               <label
                 htmlFor="modal_current_password"
-                className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
+                className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5"
               >
-                Current Password <span className="text-red-400">*</span>
+                Current Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -165,12 +165,12 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
                   onBlur={() => handleBlur("old_password")}
                   placeholder="Enter current password"
                   autoComplete="current-password"
-                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 pr-14 text-white text-sm placeholder-slate-500 focus:outline-none transition ${
+                  className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 pr-14 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition shadow-xs ${
                     touched.old_password && errors.old_password
-                      ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                      ? "border-red-500 focus:border-red-500 bg-red-50"
                       : touched.old_password && !errors.old_password && formData.old_password
                       ? "border-emerald-500/80 focus:border-emerald-500"
-                      : "border-slate-800 focus:border-indigo-500"
+                      : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                   }`}
                 />
                 <PasswordToggleButton
@@ -179,7 +179,7 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
                   ariaLabel={showOldPassword ? "Hide current password" : "Show current password"}
                 />
               </div>
-              <div className="h-4 mt-1 text-xs text-red-400 font-medium">
+              <div className="h-4 mt-1 text-xs text-red-500 font-medium">
                 {touched.old_password && errors.old_password ? errors.old_password : ""}
               </div>
             </div>
@@ -188,9 +188,9 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
             <div>
               <label
                 htmlFor="modal_new_password"
-                className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
+                className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5"
               >
-                New Password <span className="text-red-400">*</span>
+                New Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -202,12 +202,12 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
                   onBlur={() => handleBlur("new_password")}
                   placeholder="Enter new password"
                   autoComplete="new-password"
-                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 pr-14 text-white text-sm placeholder-slate-500 focus:outline-none transition ${
+                  className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 pr-14 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition shadow-xs ${
                     touched.new_password && errors.new_password
-                      ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                      ? "border-red-500 focus:border-red-500 bg-red-50"
                       : touched.new_password && !errors.new_password && formData.new_password
                       ? "border-emerald-500/80 focus:border-emerald-500"
-                      : "border-slate-800 focus:border-indigo-500"
+                      : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                   }`}
                 />
                 <PasswordToggleButton
@@ -216,7 +216,7 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
                   ariaLabel={showNewPassword ? "Hide new password" : "Show new password"}
                 />
               </div>
-              <div className="h-4 mt-1 text-xs text-red-400 font-medium">
+              <div className="h-4 mt-1 text-xs text-red-500 font-medium">
                 {touched.new_password && errors.new_password ? errors.new_password : ""}
               </div>
             </div>
@@ -225,9 +225,9 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
             <div>
               <label
                 htmlFor="modal_confirm_password"
-                className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
+                className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5"
               >
-                Confirm New Password <span className="text-red-400">*</span>
+                Confirm New Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -239,12 +239,12 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
                   onBlur={() => handleBlur("confirm_password")}
                   placeholder="Re-enter new password"
                   autoComplete="new-password"
-                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 pr-14 text-white text-sm placeholder-slate-500 focus:outline-none transition ${
+                  className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 pr-14 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition shadow-xs ${
                     touched.confirm_password && errors.confirm_password
-                      ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                      ? "border-red-500 focus:border-red-500 bg-red-50"
                       : touched.confirm_password && !errors.confirm_password && formData.confirm_password
                       ? "border-emerald-500/80 focus:border-emerald-500"
-                      : "border-slate-800 focus:border-indigo-500"
+                      : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                   }`}
                 />
                 <PasswordToggleButton
@@ -253,7 +253,7 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
                   ariaLabel={showConfirmPassword ? "Hide confirm new password" : "Show confirm new password"}
                 />
               </div>
-              <div className="h-4 mt-1 text-xs text-red-400 font-medium">
+              <div className="h-4 mt-1 text-xs text-red-500 font-medium">
                 {touched.confirm_password && errors.confirm_password
                   ? errors.confirm_password
                   : ""}
@@ -261,18 +261,18 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+            <div className="pt-4 border-t border-[#DDD6C8] flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={handleClose}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer"
+                className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] font-semibold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer border border-[#D8D4CE] shadow-xs"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20 cursor-pointer disabled:cursor-not-allowed"
+                className="bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-50 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition shadow-xs cursor-pointer disabled:cursor-not-allowed"
               >
                 {loading ? "Updating Password..." : "Update Password"}
               </button>

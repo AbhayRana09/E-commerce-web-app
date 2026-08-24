@@ -6,12 +6,25 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { getCategories } from "@/lib/products";
+import {
+  Search,
+  ShoppingCart,
+  Heart,
+  User,
+  ShoppingBag,
+  LayoutDashboard,
+  LogOut,
+  ChevronDown,
+  ShieldCheck,
+} from "lucide-react";
 
 function NavbarContent() {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
   const { totalItems } = useCart();
+  const { totalWishlistItems } = useWishlist();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,25 +100,23 @@ function NavbarContent() {
   }, []);
 
   return (
-    <nav className="bg-slate-900/95 text-white border-b border-slate-800 sticky top-0 z-50 backdrop-blur-md">
+    <nav className="bg-[#F7F5F0]/95 text-[#2C2A29] border-b border-[#DDD6C8] sticky top-0 z-50 backdrop-blur-md shadow-xs">
       {/* Tier 1: Primary Header */}
       <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo / Section Header */}
         <div className="flex items-center gap-3 shrink-0">
           {isAdminRoute || isSuperAdmin ? (
             <Link href="/admin" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+              <div className="w-8 h-8 rounded-xl bg-[#1E3A5F] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-4 h-4" />
               </div>
-              <span className="text-base font-bold tracking-tight text-white group-hover:text-amber-300 transition hidden sm:inline">
+              <span className="text-base font-bold tracking-tight text-[#2C2A29] group-hover:text-[#1E3A5F] transition hidden sm:inline">
                 Admin Portal
               </span>
             </Link>
           ) : (
-            <Link href="/" className="text-lg sm:text-xl font-extrabold tracking-tight text-white hover:text-indigo-300 transition flex items-center gap-2">
-              <span className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-indigo-600/30">
+            <Link href="/" className="text-lg sm:text-xl font-extrabold tracking-tight text-[#2C2A29] hover:text-[#1E3A5F] transition flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white text-xs font-black shadow-xs">
                 E
               </span>
               <span className="hidden sm:inline">E-Commerce Store</span>
@@ -131,16 +142,9 @@ function NavbarContent() {
                     handleSearchChange(e.target.value);
                   }
                 }}
-                className="w-full bg-slate-950/80 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-2 pl-10 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition"
+                className="w-full bg-[#FFFFFF] border border-[#D8D4CE] focus:border-[#1E3A5F] rounded-xl px-4 py-2 pl-10 text-xs sm:text-sm text-[#2C2A29] placeholder:text-stone-400 focus:outline-none transition shadow-xs"
               />
-              <svg
-                className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
         )}
@@ -148,36 +152,12 @@ function NavbarContent() {
         {/* Navigation Links & User Menu */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {!isAdminRoute && !isSuperAdmin && (
-            <>
-              <Link
-                href="/"
-                className={`text-xs sm:text-sm font-semibold transition px-2.5 sm:px-3 py-1.5 rounded-xl ${
-                  pathname === "/"
-                    ? "bg-slate-800 text-white"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800/60"
-                }`}
-              >
-                Home
-              </Link>
-              <Link
-                href="/cart"
-                className={`relative flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition px-2.5 sm:px-3 py-1.5 rounded-xl ${
-                  pathname === "/cart"
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800/60"
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-                </svg>
-                <span>Cart</span>
-                {totalItems > 0 && (
-                  <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow-sm ml-0.5 animate-in zoom-in-75 duration-200">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
-            </>
+            <Link
+              href="/"
+              className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs"
+            >
+              Home
+            </Link>
           )}
 
           {user ? (
@@ -188,58 +168,47 @@ function NavbarContent() {
                 onClick={() => setDropdownOpen((prev) => !prev)}
                 className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border transition text-left cursor-pointer select-none ${
                   isSuperAdmin || isAdminRoute
-                    ? "bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60 text-amber-200"
-                    : "bg-slate-800/80 border-slate-700/60 hover:border-indigo-500/50 text-slate-200"
+                    ? "bg-[#ECE8DF] border-[#D8D4CE] hover:border-[#1E3A5F] text-[#2C2A29]"
+                    : "bg-[#FFFFFF] border-[#D8D4CE] hover:border-[#1E3A5F] text-[#2C2A29]"
                 }`}
               >
                 <div
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shadow-sm ${
-                    isSuperAdmin || isAdminRoute
-                      ? "bg-gradient-to-tr from-amber-500 to-orange-600 text-white"
-                      : "bg-gradient-to-tr from-indigo-600 to-violet-600 text-white"
-                  }`}
+                  className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs bg-[#1E3A5F] text-white shadow-xs"
                 >
                   {isSuperAdmin || isAdminRoute ? (
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
+                    <ShieldCheck className="w-3.5 h-3.5" />
                   ) : (
-                    user.first_name?.[0] || "A"
+                    user.first_name?.[0] || "U"
                   )}
                 </div>
 
-                <span className="text-xs font-semibold text-white hidden sm:inline">
+                <span className="text-xs font-semibold text-[#2C2A29] hidden sm:inline">
                   {isSuperAdmin || isAdminRoute ? "Admin" : "My Account"}
                 </span>
 
-                <svg
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                    dropdownOpen ? "rotate-180 text-white" : ""
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${
+                    dropdownOpen ? "rotate-180 text-[#2C2A29]" : ""
                   }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
 
               {/* Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-60 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-xl">
+                <div className="absolute right-0 mt-2 w-60 bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl shadow-xl p-2 z-50 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {/* User Profile Header */}
-                  <div className="px-3 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800/60 mb-1">
+                  <div className="px-3 py-2.5 rounded-xl bg-[#ECE8DF] border border-[#D8D4CE] mb-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-bold text-white truncate">
+                      <p className="text-xs font-bold text-[#2C2A29] truncate">
                         {user.first_name} {user.last_name || ""}
                       </p>
                       {isSuperAdmin && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#1E3A5F]/10 text-[#1E3A5F] border border-[#1E3A5F]/20 shrink-0">
                           ADMIN
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-400 truncate mt-0.5">{user.email}</p>
+                    <p className="text-[11px] text-stone-500 truncate mt-0.5">{user.email}</p>
                   </div>
 
                   {/* Admin Dashboard Link */}
@@ -247,11 +216,9 @@ function NavbarContent() {
                     <Link
                       href="/admin"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 hover:bg-amber-500/10 transition"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#1E3A5F] hover:bg-[#ECE8DF] transition"
                     >
-                      <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
+                      <LayoutDashboard className="w-4 h-4 text-[#1E3A5F]" />
                       Admin Dashboard
                     </Link>
                   )}
@@ -260,27 +227,37 @@ function NavbarContent() {
                   <Link
                     href="/profile"
                     onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/70 transition"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition"
                   >
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                    <User className="w-4 h-4 text-stone-500" />
                     My Profile
                   </Link>
 
-                  {/* My Orders Link */}
-                  <Link
-                    href="/orders"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/70 transition"
-                  >
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    My Orders
-                  </Link>
+                  {/* My Wishlist Link */}
+                  {!isSuperAdmin && !isAdminRoute && (
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition"
+                    >
+                      <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+                      My Wishlist ({totalWishlistItems})
+                    </Link>
+                  )}
 
-                  <div className="my-1 border-t border-slate-800/80"></div>
+                  {/* My Orders Link (Only for Regular Users) */}
+                  {!isSuperAdmin && !isAdminRoute && (
+                    <Link
+                      href="/orders"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition"
+                    >
+                      <ShoppingBag className="w-4 h-4 text-stone-500" />
+                      My Orders
+                    </Link>
+                  )}
+
+                  <div className="my-1 border-t border-[#DDD6C8]"></div>
 
                   {/* Log Out */}
                   <button
@@ -290,11 +267,9 @@ function NavbarContent() {
                       logout();
                       showToast("Logged out successfully!", "success");
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer text-left"
                   >
-                    <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    <LogOut className="w-4 h-4 text-rose-500" />
                     Logout
                   </button>
                 </div>
@@ -304,67 +279,90 @@ function NavbarContent() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="text-slate-300 hover:text-white text-xs sm:text-sm font-medium px-3 py-1.5 transition rounded-xl hover:bg-slate-800/60"
+                className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-xl transition shadow-md shadow-indigo-600/20"
+                className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs"
               >
                 Register
               </Link>
             </div>
           )}
 
-          {/* Shopping Cart Icon (Hidden on Admin & Profile Pages) */}
+          {/* Wishlist & Shopping Cart Icons (Hidden on Admin & Profile Pages) */}
           {!isAdminRoute && !isSuperAdmin && !isProfileRoute && (
-            <Link
-              href="/cart"
-              className={`relative p-2.5 rounded-xl border transition flex items-center justify-center cursor-pointer group shrink-0 ${
-                pathname === "/cart"
-                  ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/30"
-                  : "bg-slate-800/80 border-slate-700/60 hover:border-indigo-500/50 hover:bg-slate-800 text-slate-300 hover:text-white"
-              }`}
-              title={`Shopping Cart (${totalItems} items)`}
-              aria-label="Shopping Cart"
-            >
-              <svg
-                className="w-5 h-5 text-slate-200 group-hover:text-indigo-400 group-hover:scale-105 transition-transform"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div className="flex items-center gap-2">
+              {/* Wishlist Icon */}
+              <Link
+                href="/wishlist"
+                className={`relative p-2.5 rounded-xl border transition flex items-center justify-center cursor-pointer group shrink-0 ${
+                  pathname === "/wishlist"
+                    ? "bg-[#1E3A5F] border-[#1E3A5F] text-white shadow-xs"
+                    : "bg-[#FFFFFF] border-[#D8D4CE] hover:border-[#1E3A5F] text-stone-700"
+                }`}
+                title={`Saved Wishlist (${totalWishlistItems} items)`}
+                aria-label="Wishlist"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+                <Heart
+                  className={`w-5 h-5 transition-transform group-hover:scale-110 ${
+                    pathname === "/wishlist"
+                      ? "text-white fill-white"
+                      : totalWishlistItems > 0
+                      ? "text-rose-500 fill-rose-500"
+                      : "text-[#2C2A29] group-hover:text-rose-500"
+                  }`}
                 />
-              </svg>
 
-              {/* Floating Dynamic Item Badge on Top-Right Corner */}
-              {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded-full min-w-[19px] h-[19px] flex items-center justify-center shadow-lg shadow-indigo-600/50 border border-slate-900 animate-in zoom-in-50 duration-200">
-                  {totalItems > 99 ? "99+" : totalItems}
-                </span>
-              )}
-            </Link>
+                {totalWishlistItems > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded-full min-w-[19px] h-[19px] flex items-center justify-center shadow-xs border border-[#F7F5F0] animate-in zoom-in-50 duration-200">
+                    {totalWishlistItems > 99 ? "99+" : totalWishlistItems}
+                  </span>
+                )}
+              </Link>
+
+              {/* Shopping Cart Icon */}
+              <Link
+                href="/cart"
+                className={`relative p-2.5 rounded-xl border transition flex items-center justify-center cursor-pointer group shrink-0 ${
+                  pathname === "/cart"
+                    ? "bg-[#1E3A5F] border-[#1E3A5F] text-white shadow-xs"
+                    : "bg-[#FFFFFF] border-[#D8D4CE] hover:border-[#1E3A5F] text-stone-700"
+                }`}
+                title={`Shopping Cart (${totalItems} items)`}
+                aria-label="Shopping Cart"
+              >
+                <ShoppingCart
+                  className={`w-5 h-5 transition-transform group-hover:scale-105 ${
+                    pathname === "/cart" ? "text-white" : "text-[#2C2A29] group-hover:text-[#1E3A5F]"
+                  }`}
+                />
+
+                {/* Floating Dynamic Item Badge on Top-Right Corner with Terracotta Accent */}
+                {totalItems > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-[#C86D51] text-white font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded-full min-w-[19px] h-[19px] flex items-center justify-center shadow-xs border border-[#F7F5F0] animate-in zoom-in-50 duration-200">
+                    {totalItems > 99 ? "99+" : totalItems}
+                  </span>
+                )}
+              </Link>
+            </div>
           )}
         </div>
       </div>
 
       {/* Tier 2: Secondary Category Sub-Navbar Strip (Only for Customers & Guests) */}
       {!isAdminRoute && !isSuperAdmin && categories.length > 0 && (
-        <div className="border-t border-slate-800/80 bg-slate-950/80 px-4 sm:px-6 lg:px-8 py-2">
+        <div className="border-t border-[#DDD6C8] bg-[#ECE8DF]/90 px-4 sm:px-6 lg:px-8 py-2">
           <div className="w-full max-w-[1700px] mx-auto flex items-center gap-2 overflow-x-auto scrollbar-none">
             <button
               type="button"
               onClick={() => handleCategorySelect("")}
               className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
                 isHome && currentCategory === ""
-                  ? "bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-600/30"
-                  : "bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
+                  ? "bg-[#1E3A5F] border-[#1E3A5F] text-white shadow-xs"
+                  : "bg-[#FFFFFF] border-[#D8D4CE] text-stone-700 hover:bg-[#ECE8DF] hover:text-[#2C2A29]"
               }`}
             >
               All Categories
@@ -379,8 +377,8 @@ function NavbarContent() {
                   onClick={() => handleCategorySelect(cat.id)}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
                     isSelected
-                      ? "bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-600/30"
-                      : "bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
+                      ? "bg-[#1E3A5F] border-[#1E3A5F] text-white shadow-xs"
+                      : "bg-[#FFFFFF] border-[#D8D4CE] text-stone-700 hover:bg-[#ECE8DF] hover:text-[#2C2A29]"
                   }`}
                 >
                   {cat.name}
@@ -396,10 +394,8 @@ function NavbarContent() {
 
 export default function Navbar() {
   return (
-    <Suspense fallback={<nav className="bg-slate-900 h-16 border-b border-slate-800"></nav>}>
+    <Suspense fallback={<nav className="bg-[#F7F5F0] h-16 border-b border-[#DDD6C8]"></nav>}>
       <NavbarContent />
     </Suspense>
   );
 }
-
-

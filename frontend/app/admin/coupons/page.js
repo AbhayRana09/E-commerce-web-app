@@ -61,8 +61,8 @@ export default function AdminCouponsPage() {
       errs.code = "Coupon code is required.";
     } else if (formData.code.trim().length < 3) {
       errs.code = "Coupon code must be at least 3 characters.";
-    } else if (formData.code.trim().length > 30) {
-      errs.code = "Coupon code cannot exceed 30 characters.";
+    } else if (formData.code.trim().length > 20) {
+      errs.code = "Coupon code cannot exceed 20 characters.";
     } else if (!/^[A-Z0-9_-]+$/.test(formData.code.trim())) {
       errs.code = "Coupon code can only contain letters, numbers, hyphens, and underscores.";
     }
@@ -236,12 +236,12 @@ export default function AdminCouponsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#DDD6C8]">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2C2A29] tracking-tight">
             Coupons & Discounts
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-stone-600 mt-1">
             Create, manage, and schedule promotional coupon codes with calendar validity windows.
           </p>
         </div>
@@ -249,7 +249,7 @@ export default function AdminCouponsPage() {
         <button
           type="button"
           onClick={() => handleOpenModal()}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-2 cursor-pointer shrink-0"
+          className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer shrink-0"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -262,10 +262,10 @@ export default function AdminCouponsPage() {
       <CouponStatsCards totalCoupons={coupons.length} activeCount={activeCount} />
 
       {/* Filter / Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#ECE8DF] p-4 rounded-2xl border border-[#DDD6C8] shadow-xs">
         <div className="relative w-full sm:w-80">
           <svg
-            className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"
+            className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -277,10 +277,10 @@ export default function AdminCouponsPage() {
             placeholder="Search coupons..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-[#FFFFFF] border border-[#D8D4CE] rounded-xl pl-9 pr-4 py-2 text-xs text-[#2C2A29] placeholder-stone-400 focus:outline-none focus:border-[#1E3A5F] shadow-xs"
           />
         </div>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-stone-600">
           Showing {coupons.length} coupon{coupons.length === 1 ? "" : "s"}
         </span>
       </div>

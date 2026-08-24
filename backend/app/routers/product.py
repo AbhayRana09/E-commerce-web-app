@@ -210,7 +210,7 @@ async def delete_product(
     product_id: int,
     current_admin=Depends(require_admin)
 ):
-    """Soft delete/deactivate a product (Admin only)."""
+    """Delete or soft deactivate a product (Admin only)."""
     product = await db.product.find_unique(where={"id": product_id})
     if not product:
         raise HTTPException(
@@ -218,8 +218,18 @@ async def delete_product(
             detail="Product not found"
         )
 
-    await db.product.update(
-        where={"id": product_id},
-        data={"is_active": False}
-    )
+    # Check if order_items exist
+    order_items_count = await db.orderitem.count(where={"product_id": product_id})
+    if order_items_count > 0:
+        # Cannot hard delete due to order history; mark as inactive
+        await db.product.update(
+            where={"id": product_id},
+            data={"is_active": False}
+        )
+    else:
+        # Delete related cart items, wishlist items, reviews, then product
+        await db.cartitem.delete_many(where={"product_id": product_id})
+        await db.wishlist.delete_many(where={"product_id": product_id})
+        await db.review.delete_many(where={"product_id": product_id})
+        await db.product.delete(where={"id": product_id})
     return None

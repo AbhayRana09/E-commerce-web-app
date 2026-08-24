@@ -24,6 +24,9 @@ class OrderSimulatePaymentIn(BaseModel):
     payment_method: str = Field("MOCK_CARD")
     simulate_success: bool = True
 
+class OrderCancelIn(BaseModel):
+    reason: Optional[str] = Field(None, max_length=100)
+
 class OrderItemProductOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -70,6 +73,7 @@ class OrderOut(BaseModel):
     address_id: int
     coupon_id: Optional[int] = None
     status: OrderStatusEnum
+    cancellation_reason: Optional[str] = None
     payment_method: str
     payment_status: str
     subtotal: float

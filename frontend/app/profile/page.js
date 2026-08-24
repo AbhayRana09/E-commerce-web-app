@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
+import { useEffect, useState, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -101,8 +101,8 @@ function ProfileContent() {
     const errs = {};
     if (!newAddr.street || newAddr.street.trim().length < 5) {
       errs.street = "Street address must be at least 5 characters.";
-    } else if (newAddr.street.trim().length > 120) {
-      errs.street = "Street address cannot exceed 120 characters.";
+    } else if (newAddr.street.trim().length > 80) {
+      errs.street = "Street address cannot exceed 80 characters.";
     }
 
     if (!newAddr.country) {
@@ -117,10 +117,10 @@ function ProfileContent() {
       errs.city = "Please select a city.";
     }
 
-    if (!newAddr.postal_code || newAddr.postal_code.trim().length < 3) {
-      errs.postal_code = "Zip / Postal Code must be at least 3 characters.";
-    } else if (newAddr.postal_code.trim().length > 12) {
-      errs.postal_code = "Zip / Postal Code cannot exceed 12 characters.";
+    if (!newAddr.postal_code || !newAddr.postal_code.trim()) {
+      errs.postal_code = "Zip / Postal Code is required.";
+    } else if (!/^[A-Za-z0-9\s-]{3,10}$/.test(newAddr.postal_code.trim())) {
+      errs.postal_code = "Enter a valid postal / ZIP code (3-10 characters).";
     }
 
     return errs;
@@ -316,8 +316,8 @@ function ProfileContent() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-slate-400 space-y-3">
-        <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex flex-col items-center justify-center py-24 text-stone-400 space-y-3">
+        <div className="w-8 h-8 border-3 border-[#1E3A5F] border-t-transparent rounded-full animate-spin"></div>
         <p className="text-sm">Loading profile...</p>
       </div>
     );
@@ -326,14 +326,14 @@ function ProfileContent() {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 pb-16">
       {/* Profile Section Tabs */}
-      <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800 w-fit shadow-lg">
+      <div className="flex items-center gap-2 bg-[#ECE8DF] p-1.5 rounded-2xl border border-[#DDD6C8] w-fit shadow-xs">
         <button
           type="button"
           onClick={() => router.push("/profile?tab=profile")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
             activeTab === "profile"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-              : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              ? "bg-[#1E3A5F] text-white shadow-xs"
+              : "text-stone-600 hover:text-[#2C2A29] hover:bg-[#DDD6C8]"
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -347,8 +347,8 @@ function ProfileContent() {
           onClick={() => router.push("/profile?tab=addresses")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
             activeTab === "addresses"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-              : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              ? "bg-[#1E3A5F] text-white shadow-xs"
+              : "text-stone-600 hover:text-[#2C2A29] hover:bg-[#DDD6C8]"
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -383,19 +383,19 @@ function ProfileContent() {
       ) : (
         <>
           {/* Address Book Section */}
-          <div id="addresses-section" className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div id="addresses-section" className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex items-center justify-between border-b border-[#DDD6C8] pb-4">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                <h2 className="text-lg sm:text-xl font-bold text-[#2C2A29] tracking-tight">
                   Saved Shipping Addresses
                 </h2>
-                <p className="text-slate-400 text-xs mt-0.5">
+                <p className="text-stone-600 text-xs mt-0.5">
                   Manage your delivery addresses for quick checkout.
                 </p>
               </div>
               <button
                 onClick={handleOpenAddModal}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
+                className="bg-[#1E3A5F] hover:bg-[#152843] text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition shadow-xs cursor-pointer flex items-center gap-1.5"
               >
                 <span>+ Add Address</span>
               </button>
@@ -403,24 +403,24 @@ function ProfileContent() {
 
             {/* Address Cards Grid */}
             {loadingAddr ? (
-              <div className="py-12 text-center text-slate-400 space-y-2">
-                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <div className="py-12 text-center text-stone-500 space-y-2">
+                <div className="w-6 h-6 border-2 border-[#1E3A5F] border-t-transparent rounded-full animate-spin mx-auto"></div>
                 <p className="text-xs">Loading addresses...</p>
               </div>
             ) : addresses.length === 0 ? (
-              <div className="py-12 text-center border-2 border-dashed border-slate-800/80 rounded-2xl bg-slate-950/40 p-6 space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500 text-xl">
+              <div className="py-12 text-center border-2 border-dashed border-[#DDD6C8] rounded-2xl bg-[#FFFFFF] p-6 space-y-3 shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-[#ECE8DF] border border-[#DDD6C8] flex items-center justify-center mx-auto text-stone-400 text-xl">
                   📍
                 </div>
                 <div>
-                  <h3 className="text-slate-200 font-semibold text-sm">No addresses saved yet</h3>
-                  <p className="text-slate-400 text-xs mt-1">
+                  <h3 className="text-[#2C2A29] font-semibold text-sm">No addresses saved yet</h3>
+                  <p className="text-stone-600 text-xs mt-1">
                     Add your primary delivery address to speed up checkout.
                   </p>
                 </div>
                 <button
                   onClick={handleOpenAddModal}
-                  className="inline-block bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer"
+                  className="inline-block bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer"
                 >
                   Add First Address
                 </button>
@@ -480,7 +480,7 @@ function ProfileContent() {
 export default function ProfilePage() {
   return (
     <RouteGuard type="private">
-      <Suspense fallback={<div className="py-20 text-center text-slate-400">Loading profile...</div>}>
+      <Suspense fallback={<div className="py-20 text-center text-stone-400">Loading profile...</div>}>
         <ProfileContent />
       </Suspense>
     </RouteGuard>

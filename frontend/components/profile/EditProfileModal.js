@@ -109,20 +109,20 @@ export default function EditProfileModal({ open, onOpenChange }) {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg w-[95vw] p-6 sm:p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
-          <DialogHeader className="border-b border-slate-800 pb-4 flex flex-row items-center justify-between text-left">
+        <DialogContent className="max-w-lg w-[95vw] p-6 sm:p-8 bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl shadow-2xl">
+          <DialogHeader className="border-b border-[#DDD6C8] pb-4 flex flex-row items-center justify-between text-left">
             <div>
-              <DialogTitle className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-[#2C2A29] tracking-tight flex items-center gap-2">
                 <span>✏️</span> Edit Profile
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-400 mt-0.5">
+              <DialogDescription className="text-xs text-stone-600 mt-0.5">
                 Update your account name and personal details below.
               </DialogDescription>
             </div>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="text-slate-400 hover:text-white text-sm p-1.5 rounded-full hover:bg-slate-800 transition cursor-pointer"
+              className="text-stone-400 hover:text-[#2C2A29] text-sm p-1.5 rounded-full hover:bg-[#ECE8DF] transition cursor-pointer"
             >
               ✕
             </button>
@@ -131,91 +131,125 @@ export default function EditProfileModal({ open, onOpenChange }) {
           <form onSubmit={handleFormSubmit} noValidate className="space-y-4 pt-2">
             {/* First Name */}
             <div>
-              <label
-                htmlFor="modal_first_name"
-                className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
-              >
-                First Name <span className="text-red-400">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="modal_first_name"
+                  className="block text-xs font-semibold text-stone-700 uppercase tracking-wider"
+                >
+                  First Name <span className="text-red-500">*</span>
+                </label>
+                <span
+                  className={`text-[11px] font-mono ${
+                    formData.first_name.length >= 30
+                      ? "text-red-600 font-bold"
+                      : formData.first_name.length >= 25
+                      ? "text-amber-600"
+                      : "text-stone-400"
+                  }`}
+                >
+                  {formData.first_name.length}/30
+                </span>
+              </div>
               <input
                 id="modal_first_name"
                 type="text"
+                maxLength={30}
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleChange}
                 onBlur={() => handleBlur("first_name")}
-                placeholder="First Name"
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none transition ${
+                placeholder="e.g. Alex"
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition shadow-xs ${
                   touched.first_name && errors.first_name
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.first_name && !errors.first_name && formData.first_name
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               />
-              <div className="h-4 mt-1 text-xs text-red-400 font-medium">
-                {touched.first_name && errors.first_name ? errors.first_name : ""}
+              <div className="flex items-center justify-between mt-1 text-xs">
+                <span className="text-red-500 font-medium">
+                  {touched.first_name && errors.first_name ? errors.first_name : ""}
+                </span>
+                <span className="text-[11px] text-stone-400">Max 30 characters</span>
               </div>
             </div>
 
             {/* Last Name */}
             <div>
-              <label
-                htmlFor="modal_last_name"
-                className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
-              >
-                Last Name <span className="text-red-400">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="modal_last_name"
+                  className="block text-xs font-semibold text-stone-700 uppercase tracking-wider"
+                >
+                  Last Name <span className="text-red-500">*</span>
+                </label>
+                <span
+                  className={`text-[11px] font-mono ${
+                    formData.last_name.length >= 30
+                      ? "text-red-600 font-bold"
+                      : formData.last_name.length >= 25
+                      ? "text-amber-600"
+                      : "text-stone-400"
+                  }`}
+                >
+                  {formData.last_name.length}/30
+                </span>
+              </div>
               <input
                 id="modal_last_name"
                 type="text"
+                maxLength={30}
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleChange}
                 onBlur={() => handleBlur("last_name")}
-                placeholder="Last Name"
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none transition ${
+                placeholder="e.g. Morgan"
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition shadow-xs ${
                   touched.last_name && errors.last_name
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.last_name && !errors.last_name && formData.last_name
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               />
-              <div className="h-4 mt-1 text-xs text-red-400 font-medium">
-                {touched.last_name && errors.last_name ? errors.last_name : ""}
+              <div className="flex items-center justify-between mt-1 text-xs">
+                <span className="text-red-500 font-medium">
+                  {touched.last_name && errors.last_name ? errors.last_name : ""}
+                </span>
+                <span className="text-[11px] text-stone-400">Max 30 characters</span>
               </div>
             </div>
 
             {/* Email Address (Read-only) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">
                 Email Address
               </label>
               <input
                 type="email"
                 disabled
                 value={user?.email || ""}
-                className="w-full bg-slate-950/60 border border-slate-800/80 rounded-xl px-4 py-2.5 text-slate-400 text-sm cursor-not-allowed select-none"
+                className="w-full bg-[#ECE8DF]/60 border border-[#DDD6C8] rounded-xl px-4 py-2.5 text-stone-500 text-sm cursor-not-allowed select-none"
               />
-              <p className="text-[11px] text-slate-500 mt-1">
+              <p className="text-[11px] text-stone-500 mt-1">
                 Email address cannot be modified as it is tied to your login identity.
               </p>
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+            <div className="pt-4 border-t border-[#DDD6C8] flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer"
+                className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] font-semibold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer border border-[#D8D4CE] shadow-xs"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading || !hasChanges}
-                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20 cursor-pointer disabled:cursor-not-allowed"
+                className="bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-40 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition shadow-xs cursor-pointer disabled:cursor-not-allowed"
               >
                 {loading ? "Saving Changes..." : "Save Changes"}
               </button>

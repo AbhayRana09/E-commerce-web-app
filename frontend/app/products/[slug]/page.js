@@ -6,19 +6,31 @@ import Link from "next/link";
 import { getProductBySlug } from "@/lib/products";
 import { useToast } from "@/context/ToastContext";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import RouteGuard from "@/components/RouteGuard";
+import {
+  ShoppingCart,
+  Heart,
+  Minus,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+} from "lucide-react";
 
 function ProductDetailContent() {
   const params = useParams();
   const router = useRouter();
   const { showToast } = useToast();
   const { addItem, loading: cartLoading } = useCart();
+  const { isInWishlist, toggleItem: toggleWishlist } = useWishlist();
   const slug = params?.slug;
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -46,10 +58,10 @@ function ProductDetailContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
         <div className="animate-pulse flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-400 text-sm font-medium">Loading product details...</p>
+          <div className="w-10 h-10 border-3 border-[#1E3A5F] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-stone-500 text-xs font-medium">Loading product details...</p>
         </div>
       </div>
     );
@@ -57,28 +69,16 @@ function ProductDetailContent() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center bg-slate-900/60 p-8 rounded-2xl border border-slate-800 backdrop-blur-md">
-          <svg
-            className="w-12 h-12 text-red-400 mx-auto mb-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <h2 className="text-xl font-bold text-slate-100 mb-2">Product Not Found</h2>
-          <p className="text-slate-400 text-sm mb-6">{error || "The product you requested could not be found."}</p>
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center bg-[#ECE8DF] p-8 rounded-3xl border border-[#DDD6C8] shadow-xs space-y-3">
+          <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
+          <h2 className="text-lg font-bold text-[#2C2A29]">Product Not Found</h2>
+          <p className="text-stone-600 text-xs">{error || "The requested item is no longer available."}</p>
           <Link
-            href="/products"
-            className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition"
+            href="/"
+            className="inline-block bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-xs"
           >
-            Return to Products Catalog
+            Return to Store
           </Link>
         </div>
       </div>
@@ -88,25 +88,32 @@ function ProductDetailContent() {
   const isOutOfStock = product.stock_quantity <= 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center space-x-2 text-xs text-slate-400">
-          <Link href="/" className="hover:text-slate-200 transition">
+    <div className="w-full max-w-[1700px] mx-auto py-6">
+      <div className="space-y-6">
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center space-x-2 text-xs text-stone-500">
+          <Link href="/" className="hover:text-[#2C2A29] transition">
             Home
           </Link>
           <span>/</span>
-          <Link href="/products" className="hover:text-slate-200 transition">
-            Products
-          </Link>
-          <span>/</span>
-          <span className="text-slate-200 font-medium truncate max-w-xs">{product.name}</span>
+          {product.category && (
+            <>
+              <Link
+                href={`/?category_id=${product.category.id}`}
+                className="hover:text-[#2C2A29] transition"
+              >
+                {product.category.name}
+              </Link>
+              <span>/</span>
+            </>
+          )}
+          <span className="text-stone-800 font-medium truncate max-w-xs">{product.name}</span>
         </nav>
 
         {/* Main Product Card */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl p-6 sm:p-8 shadow-xs grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 min-w-0">
           {/* Product Image View */}
-          <div className="relative aspect-square rounded-2xl bg-slate-950 overflow-hidden border border-slate-800 shadow-2xl">
+          <div className="relative aspect-square rounded-2xl bg-[#FFFFFF] overflow-hidden border border-[#D8D4CE] shadow-xs min-w-0">
             {product.image_url ? (
               <img
                 src={product.image_url}
@@ -114,59 +121,111 @@ function ProductDetailContent() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-600">
+              <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
                 No Image Available
               </div>
             )}
             {product.category?.name && (
-              <span className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md text-indigo-300 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-800">
+              <span className="absolute top-4 left-4 bg-[#FFFFFF]/95 backdrop-blur-md text-[#1E3A5F] text-xs font-semibold px-3 py-1.5 rounded-full border border-[#D8D4CE] shadow-xs">
                 {product.category.name}
               </span>
             )}
+
+            {/* Heart Wishlist overlay button */}
+            <button
+              type="button"
+              onClick={() => toggleWishlist(product)}
+              className={`absolute top-4 right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center transition shadow-md cursor-pointer ${
+                isInWishlist(product.id)
+                  ? "bg-rose-500 text-white hover:bg-rose-600 scale-105"
+                  : "bg-[#FFFFFF]/90 hover:bg-[#FFFFFF] text-stone-600 hover:text-rose-500 border border-[#D8D4CE]"
+              }`}
+              title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+              aria-label="Toggle Wishlist"
+            >
+              <Heart
+                className={`w-5 h-5 transition-transform active:scale-125 ${
+                  isInWishlist(product.id) ? "fill-current" : ""
+                }`}
+              />
+            </button>
           </div>
 
           {/* Product Info & Actions */}
-          <div className="flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
+          <div className="flex flex-col justify-between space-y-6 min-w-0 w-full overflow-hidden">
+            <div className="space-y-4 min-w-0">
               {/* Availability Badge */}
               <div className="flex items-center gap-2">
                 {isOutOfStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-red-500/10 text-red-400 border-red-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-rose-50 text-rose-700 border-rose-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                     <span>Out of Stock</span>
                   </span>
                 ) : product.stock_quantity <= 5 ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-500/10 text-amber-300 border-amber-500/30">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-800 border-amber-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                     <span>Only {product.stock_quantity} left in stock!</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     <span>In Stock</span>
                   </span>
                 )}
               </div>
 
               {/* Product Title */}
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2C2A29] tracking-tight break-words [overflow-wrap:anywhere] min-w-0">
                 {product.name}
               </h1>
 
               {/* Price Tag */}
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-slate-100">${product.price.toFixed(2)}</span>
-                <span className="text-xs text-slate-500 font-mono">Taxes included</span>
+                <span className="text-3xl font-bold text-[#2C2A29] font-mono">${product.price.toFixed(2)}</span>
+                <span className="text-xs text-stone-500 font-mono">Taxes included</span>
               </div>
 
-              {/* Description */}
-              <div className="border-t border-b border-slate-800/80 py-4">
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              {/* Description (Collapsible Read More / Show Less) */}
+              <div className="border-t border-b border-[#DDD6C8] py-4 min-w-0">
+                <h3 className="text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
                   Description
                 </h3>
-                <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
-                  {product.description}
-                </p>
+
+                <div className="relative">
+                  <p
+                    className={`text-stone-600 text-sm leading-relaxed whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0 transition-all duration-200 ${
+                      !isDescriptionExpanded && (product.description || "").length > 220
+                        ? "line-clamp-4 max-h-24 overflow-hidden"
+                        : ""
+                    }`}
+                  >
+                    {product.description}
+                  </p>
+
+                  {!isDescriptionExpanded && (product.description || "").length > 220 && (
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#ECE8DF] via-[#ECE8DF]/80 to-transparent pointer-events-none"
+                    />
+                  )}
+                </div>
+
+                {(product.description || "").length > 220 && (
+                  <div className="mt-2.5 flex items-center justify-start">
+                    <button
+                      type="button"
+                      onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                      className="text-xs font-semibold text-[#1E3A5F] hover:text-[#152843] flex items-center gap-1 transition cursor-pointer"
+                    >
+                      <span>{isDescriptionExpanded ? "Show Less" : "Read More"}</span>
+                      {isDescriptionExpanded ? (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -174,24 +233,24 @@ function ProductDetailContent() {
             <div className="space-y-4 pt-2">
               {!isOutOfStock && (
                 <div className="flex items-center gap-4">
-                  <label className="text-xs font-semibold text-slate-400">Quantity</label>
-                  <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+                  <label className="text-xs font-semibold text-stone-600">Quantity</label>
+                  <div className="flex items-center bg-[#FFFFFF] border border-[#D8D4CE] rounded-xl overflow-hidden shadow-xs">
                     <button
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="px-3 py-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition"
+                      className="px-3 py-1.5 text-stone-600 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition cursor-pointer"
                     >
-                      -
+                      <Minus className="w-3.5 h-3.5" />
                     </button>
-                    <span className="px-4 py-1.5 text-sm font-semibold text-slate-200">
+                    <span className="px-4 py-1.5 text-sm font-semibold text-[#2C2A29]">
                       {quantity}
                     </span>
                     <button
                       onClick={() =>
                         setQuantity((q) => Math.min(product.stock_quantity, q + 1))
                       }
-                      className="px-3 py-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition"
+                      className="px-3 py-1.5 text-stone-600 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition cursor-pointer"
                     >
-                      +
+                      <Plus className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -201,26 +260,38 @@ function ProductDetailContent() {
                 <button
                   onClick={handleAddToCart}
                   disabled={isOutOfStock || cartLoading}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold py-3 px-6 rounded-xl transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                  className="flex-1 bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-50 disabled:hover:bg-[#1E3A5F] text-white text-sm font-semibold py-3 px-6 rounded-xl transition shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
-                    />
-                  </svg>
-                  {cartLoading
-                    ? "Adding to Cart..."
-                    : isOutOfStock
-                    ? "Out of Stock"
-                    : "Add to Cart"}
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>
+                    {cartLoading
+                      ? "Adding to Cart..."
+                      : isOutOfStock
+                      ? "Out of Stock"
+                      : "Add to Cart"}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => toggleWishlist(product)}
+                  className={`border font-semibold text-sm py-3 px-4 rounded-xl transition cursor-pointer shadow-xs flex items-center justify-center gap-2 ${
+                    isInWishlist(product.id)
+                      ? "bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100"
+                      : "bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border-[#D8D4CE]"
+                  }`}
+                  title={isInWishlist(product.id) ? "Remove from Wishlist" : "Save to Wishlist"}
+                >
+                  <Heart
+                    className={`w-4 h-4 ${isInWishlist(product.id) ? "fill-current text-rose-500" : "text-stone-500"}`}
+                  />
+                  <span className="hidden sm:inline">
+                    {isInWishlist(product.id) ? "Saved" : "Wishlist"}
+                  </span>
                 </button>
 
                 <button
                   onClick={() => router.back()}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold py-3 px-4 rounded-xl transition cursor-pointer"
+                  className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border border-[#D8D4CE] font-semibold text-sm py-3 px-5 rounded-xl transition cursor-pointer shadow-xs"
                 >
                   Back
                 </button>
@@ -235,7 +306,7 @@ function ProductDetailContent() {
 
 export default function ProductDetailPage() {
   return (
-    <RouteGuard type="customer" adminRedirect="/admin/products">
+    <RouteGuard type="customer" adminRedirect="/admin">
       <ProductDetailContent />
     </RouteGuard>
   );

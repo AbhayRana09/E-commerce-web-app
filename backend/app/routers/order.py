@@ -1,7 +1,7 @@
 from math import ceil
 from typing import Optional, Any, cast, List
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Body
 
 from app.database import db
 from app.dependencies.auth import get_current_user, require_admin
@@ -12,6 +12,7 @@ from app.schemas.order import (
     OrderStatusUpdate,
     OrderCreateIn,
     OrderSimulatePaymentIn,
+    OrderCancelIn,
     AdminStatsOut,
     RecentOrderSummary,
 )
@@ -290,6 +291,7 @@ async def create_order(
     return order
 
 @router.post("/{order_id}/simulate-payment")
+@router.post("/{order_id}/pay")
 async def simulate_order_payment(
     order_id: int,
     payload: OrderSimulatePaymentIn,
@@ -317,23 +319,25 @@ async def simulate_order_payment(
             "status": "PAYMENT_FAILED"
         }
 
-    # Success: Mark order as CONFIRMED
+    # Success or COD: Mark order as CONFIRMED
+    payment_status = "COD_PENDING" if payload.payment_method == "COD" else "PAID"
     updated = await db.order.update(
         where={"id": order_id},
         data=cast(Any, {
             "status": "CONFIRMED",
-            "payment_status": "PAID",
+            "payment_status": payment_status,
             "payment_method": payload.payment_method
         })
     )
 
     return {
         "success": True,
-        "message": "Payment captured and order confirmed successfully!",
+        "message": "Payment captured and order confirmed successfully!" if payload.payment_method != "COD" else "Order confirmed with Cash on Delivery!",
         "order_id": order_id,
         "status": "CONFIRMED"
     }
 
+@router.get("/my", response_model=List[OrderOut])
 @router.get("/my-orders", response_model=List[OrderOut])
 async def get_my_orders(current_user=Depends(get_current_user)):
     """Fetch order history for authenticated customer."""
@@ -381,6 +385,7 @@ async def get_single_order(
 @router.patch("/{order_id}/cancel", response_model=OrderOut)
 async def cancel_my_order(
     order_id: int,
+    payload: Optional[OrderCancelIn] = Body(None),
     current_user=Depends(get_current_user)
 ):
     """Allows customer to cancel a pending order and restore stock."""
@@ -407,9 +412,14 @@ async def cancel_my_order(
             data={"stock_quantity": {"increment": item.quantity}}
         )
 
+    reason_str = payload.reason.strip() if payload and payload.reason and payload.reason.strip() else "Cancelled by customer"
+
     cancelled = await db.order.update(
         where={"id": order_id},
-        data=cast(Any, {"status": "CANCELLED"}),
+        data=cast(Any, {
+            "status": "CANCELLED",
+            "cancellation_reason": reason_str
+        }),
         include={
             "user": True,
             "address": True,

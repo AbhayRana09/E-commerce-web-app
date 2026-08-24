@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
-
+import { useState, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
@@ -64,7 +63,6 @@ function ResetPasswordContent() {
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
@@ -90,7 +88,6 @@ function ResetPasswordContent() {
       return;
     }
 
-
     isSubmittingRef.current = true;
     setLoading(true);
 
@@ -113,18 +110,18 @@ function ResetPasswordContent() {
   // Missing token gate
   if (!token) {
     return (
-      <div className="max-w-md mx-auto my-12 p-8 sm:p-10 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl text-center space-y-4">
-        <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mx-auto text-xl font-bold">
+      <div className="max-w-md mx-auto my-12 p-8 sm:p-10 bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl shadow-xs text-center space-y-4">
+        <div className="w-12 h-12 rounded-full bg-red-100 text-red-700 flex items-center justify-center mx-auto text-xl font-bold">
           !
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Invalid Reset Link</h1>
-        <p className="text-slate-300 text-sm leading-relaxed">
+        <h1 className="text-2xl font-bold text-[#2C2A29] tracking-tight">Invalid Reset Link</h1>
+        <p className="text-stone-600 text-sm leading-relaxed">
           No password reset token was detected in your request URL. Please request a new password reset link.
         </p>
         <div className="pt-2">
           <Link
             href="/forgot-password"
-            className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20"
+            className="inline-block bg-[#1E3A5F] hover:bg-[#152843] text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-xs"
           >
             Request New Link
           </Link>
@@ -133,41 +130,30 @@ function ResetPasswordContent() {
     );
   }
 
-  // Password requirements checklist
-  const pwd = formData.newPassword;
-  const pwdChecks = {
-    length: pwd.length >= 8,
-    upper: /[A-Z]/.test(pwd),
-    lower: /[a-z]/.test(pwd),
-    number: /\d/.test(pwd),
-    special: /[^A-Za-z0-9]/.test(pwd),
-  };
-
   return (
-    <div className="max-w-md mx-auto my-6 sm:my-10 p-6 sm:p-8 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl">
+    <div className="max-w-md mx-auto my-6 sm:my-10 p-6 sm:p-8 bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl shadow-xs">
       <div className="text-center mb-6 space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#2C2A29] tracking-tight">
           Reset Password
         </h1>
-        <p className="text-slate-400 text-sm">
+        <p className="text-stone-600 text-sm">
           Enter and confirm your new secure password.
         </p>
       </div>
 
-
       {resetCompleted ? (
         <div className="text-center space-y-4 py-4">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl font-bold">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-xl font-bold">
             ✓
           </div>
-          <h2 className="text-xl font-bold text-white">Password Updated</h2>
-          <p className="text-slate-300 text-sm">
+          <h2 className="text-xl font-bold text-[#2C2A29]">Password Updated</h2>
+          <p className="text-stone-600 text-sm">
             Your password has been successfully reset. Redirecting to login...
           </p>
           <div className="pt-2">
             <Link
               href="/login"
-              className="inline-block text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20"
+              className="inline-block text-sm font-semibold bg-[#1E3A5F] hover:bg-[#152843] text-white px-6 py-2.5 rounded-xl transition shadow-xs"
             >
               Go to Login Now
             </Link>
@@ -179,9 +165,9 @@ function ResetPasswordContent() {
           <div>
             <label
               htmlFor="new_password"
-              className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
+              className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5"
             >
-              New Password <span className="text-red-400">*</span>
+              New Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -195,12 +181,12 @@ function ResetPasswordContent() {
                 onBlur={() => handleBlur("newPassword")}
                 placeholder="New Password"
                 autoComplete="new-password"
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:outline-none transition pr-16 ${
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-3 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition pr-16 shadow-xs ${
                   touched.newPassword && errors.newPassword
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.newPassword && !errors.newPassword && formData.newPassword
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               />
               <PasswordToggleButton
@@ -209,19 +195,18 @@ function ResetPasswordContent() {
                 ariaLabel={showPassword ? "Hide password" : "Show password"}
               />
             </div>
-            <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
+            <div className="h-5 mt-1 text-xs text-red-500 font-medium leading-5">
               {touched.newPassword && errors.newPassword ? errors.newPassword : "\u00A0"}
             </div>
           </div>
-
 
           {/* Confirm Password */}
           <div>
             <label
               htmlFor="confirm_new_password"
-              className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5"
+              className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5"
             >
-              Confirm New Password <span className="text-red-400">*</span>
+              Confirm New Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -235,12 +220,12 @@ function ResetPasswordContent() {
                 onBlur={() => handleBlur("confirmPassword")}
                 placeholder="Confirm New Password"
                 autoComplete="new-password"
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:outline-none transition pr-16 ${
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-3 text-[#2C2A29] text-sm placeholder-stone-400 focus:outline-none transition pr-16 shadow-xs ${
                   touched.confirmPassword && errors.confirmPassword
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.confirmPassword && !errors.confirmPassword && formData.confirmPassword
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               />
 
@@ -252,30 +237,29 @@ function ResetPasswordContent() {
             </div>
             <div className="h-5 mt-1 text-xs font-medium leading-5">
               {touched.confirmPassword && errors.confirmPassword ? (
-                <span className="text-red-400 block">{errors.confirmPassword}</span>
+                <span className="text-red-500 block">{errors.confirmPassword}</span>
               ) : formData.confirmPassword && !errors.confirmPassword ? (
-                <span className="text-emerald-400 block">✓ Passwords match</span>
+                <span className="text-emerald-700 block">✓ Passwords match</span>
               ) : (
                 "\u00A0"
               )}
             </div>
           </div>
 
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold py-3 rounded-xl transition shadow-md shadow-indigo-600/20 cursor-pointer mt-2"
+            className="w-full bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-40 text-white font-semibold py-3 rounded-xl transition shadow-xs cursor-pointer mt-2"
           >
             {loading ? "Updating..." : "Update Password"}
           </button>
         </form>
       )}
 
-      <div className="text-center mt-8 pt-6 border-t border-slate-800 text-sm text-slate-400">
+      <div className="text-center mt-8 pt-6 border-t border-[#DDD6C8] text-sm text-stone-600">
         <Link
           href="/login"
-          className="text-indigo-400 hover:text-indigo-300 font-semibold transition"
+          className="text-[#1E3A5F] hover:text-[#152843] font-semibold transition"
         >
           Back to Login
         </Link>
@@ -287,10 +271,9 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
   return (
     <RouteGuard type="guest">
-      <Suspense fallback={<div className="text-center py-16 text-slate-400">Loading...</div>}>
+      <Suspense fallback={<div className="text-center py-16 text-stone-500">Loading...</div>}>
         <ResetPasswordContent />
       </Suspense>
     </RouteGuard>
   );
 }
-

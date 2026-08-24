@@ -5,16 +5,16 @@ from app.schemas.category import CategoryOut
 
 class ProductCreate(BaseModel):
     category_id: int
-    name: str
-    description: str
+    name: str = Field(..., min_length=2, max_length=120)
+    description: str = Field(..., min_length=5, max_length=2000)
     price: float = Field(..., gt=0)
     stock_quantity: int = Field(..., ge=0)
     image_url: Optional[str] = None
 
 class ProductUpdate(BaseModel):
     category_id: Optional[int] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=2, max_length=120)
+    description: Optional[str] = Field(None, min_length=5, max_length=2000)
     price: Optional[float] = Field(None, gt=0)
     stock_quantity: Optional[int] = Field(None, ge=0)
     is_active: Optional[bool] = None

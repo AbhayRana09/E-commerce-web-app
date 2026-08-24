@@ -29,20 +29,20 @@ export default function AddressFormModal({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] max-h-[90vh] p-6 sm:p-8 overflow-y-auto">
-        <DialogHeader className="border-b border-slate-800 pb-3 mb-4 flex flex-row items-center justify-between text-left">
+      <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] max-h-[90vh] p-6 sm:p-8 overflow-y-auto bg-[#F7F5F0] border border-[#DDD6C8] shadow-2xl">
+        <DialogHeader className="border-b border-[#DDD6C8] pb-3 mb-4 flex flex-row items-center justify-between text-left">
           <div>
-            <DialogTitle className="text-lg sm:text-xl font-bold text-white tracking-tight">
+            <DialogTitle className="text-lg sm:text-xl font-bold text-[#2C2A29] tracking-tight">
               {editingAddrId ? "Edit Shipping Address" : "Add Shipping Address"}
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-400 mt-0.5">
+            <DialogDescription className="text-xs text-stone-600 mt-0.5">
               Enter your full delivery details below
             </DialogDescription>
           </div>
           <button
             type="button"
             onClick={onCancel}
-            className="text-slate-400 hover:text-white text-sm p-1.5 rounded-full hover:bg-slate-800 transition cursor-pointer"
+            className="text-stone-400 hover:text-[#2C2A29] text-sm p-1.5 rounded-full hover:bg-[#ECE8DF] transition cursor-pointer"
           >
             ✕
           </button>
@@ -51,11 +51,25 @@ export default function AddressFormModal({
         <form onSubmit={onSubmit} noValidate className="space-y-2 text-sm">
           {/* Street Address */}
           <div>
-            <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-1">
-              Street Address <span className="text-red-400">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-stone-700 text-xs font-semibold uppercase tracking-wider">
+                Street Address <span className="text-red-500">*</span>
+              </label>
+              <span
+                className={`text-[11px] font-mono ${
+                  (newAddr.street || "").length >= 80
+                    ? "text-red-600 font-bold"
+                    : (newAddr.street || "").length >= 65
+                    ? "text-amber-600"
+                    : "text-stone-400"
+                }`}
+              >
+                {(newAddr.street || "").length}/80
+              </span>
+            </div>
             <input
               type="text"
+              maxLength={80}
               suppressHydrationWarning
               value={newAddr.street}
               onChange={(e) => {
@@ -63,17 +77,20 @@ export default function AddressFormModal({
                 setTouched((prev) => ({ ...prev, street: true }));
               }}
               onBlur={() => setTouched((prev) => ({ ...prev, street: true }))}
-              placeholder="Street Address"
-              className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition ${
+              placeholder="e.g. 742 Evergreen Terrace, Apt 4B"
+              className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 text-[#2C2A29] text-sm focus:outline-none transition shadow-xs ${
                 touched.street && errors.street
-                  ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                  ? "border-red-500 focus:border-red-500 bg-red-50"
                   : touched.street && !errors.street
                   ? "border-emerald-500/80 focus:border-emerald-500"
-                  : "border-slate-800 focus:border-indigo-500"
+                  : "border-[#D8D4CE] focus:border-[#1E3A5F]"
               }`}
             />
-            <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
-              {touched.street && errors.street ? errors.street : "\u00A0"}
+            <div className="flex items-center justify-between mt-1 text-xs">
+              <span className="text-red-500 font-medium">
+                {touched.street && errors.street ? errors.street : ""}
+              </span>
+              <span className="text-[11px] text-stone-400">Max 80 characters</span>
             </div>
           </div>
 
@@ -81,8 +98,8 @@ export default function AddressFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* Country Select */}
             <div>
-              <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-1">
-                Country <span className="text-red-400">*</span>
+              <label className="block text-stone-700 text-xs font-semibold uppercase tracking-wider mb-1">
+                Country <span className="text-red-500">*</span>
               </label>
               <select
                 value={selectedCountryCode}
@@ -100,12 +117,12 @@ export default function AddressFormModal({
                   setTouched((prev) => ({ ...prev, country: true, state: true, city: true }));
                 }}
                 onBlur={() => setTouched((prev) => ({ ...prev, country: true }))}
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition cursor-pointer ${
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 text-[#2C2A29] text-sm focus:outline-none transition cursor-pointer shadow-xs ${
                   touched.country && errors.country
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.country && !errors.country && selectedCountryCode
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               >
                 <option value="">Select Country</option>
@@ -115,15 +132,15 @@ export default function AddressFormModal({
                   </option>
                 ))}
               </select>
-              <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
+              <div className="h-5 mt-1 text-xs text-red-500 font-medium leading-5">
                 {touched.country && errors.country ? errors.country : "\u00A0"}
               </div>
             </div>
 
             {/* State Select */}
             <div>
-              <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-1">
-                State / Region <span className="text-red-400">*</span>
+              <label className="block text-stone-700 text-xs font-semibold uppercase tracking-wider mb-1">
+                State / Region <span className="text-red-500">*</span>
               </label>
               <select
                 disabled={!selectedCountryCode}
@@ -140,12 +157,12 @@ export default function AddressFormModal({
                   setTouched((prev) => ({ ...prev, state: true, city: true }));
                 }}
                 onBlur={() => setTouched((prev) => ({ ...prev, state: true }))}
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition cursor-pointer disabled:opacity-40 ${
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 text-[#2C2A29] text-sm focus:outline-none transition cursor-pointer disabled:opacity-40 shadow-xs ${
                   touched.state && errors.state
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.state && !errors.state && selectedStateCode
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               >
                 <option value="">
@@ -157,7 +174,7 @@ export default function AddressFormModal({
                   </option>
                 ))}
               </select>
-              <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
+              <div className="h-5 mt-1 text-xs text-red-500 font-medium leading-5">
                 {touched.state && errors.state ? errors.state : "\u00A0"}
               </div>
             </div>
@@ -167,8 +184,8 @@ export default function AddressFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* City Select */}
             <div>
-              <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-1">
-                City <span className="text-red-400">*</span>
+              <label className="block text-stone-700 text-xs font-semibold uppercase tracking-wider mb-1">
+                City <span className="text-red-500">*</span>
               </label>
               <select
                 disabled={!selectedStateCode}
@@ -178,12 +195,12 @@ export default function AddressFormModal({
                   setTouched((prev) => ({ ...prev, city: true }));
                 }}
                 onBlur={() => setTouched((prev) => ({ ...prev, city: true }))}
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition cursor-pointer disabled:opacity-40 ${
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 text-[#2C2A29] text-sm focus:outline-none transition cursor-pointer disabled:opacity-40 shadow-xs ${
                   touched.city && errors.city
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.city && !errors.city && newAddr.city
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               >
                 <option value="">
@@ -201,36 +218,53 @@ export default function AddressFormModal({
                   </option>
                 ) : null}
               </select>
-              <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
+              <div className="h-5 mt-1 text-xs text-red-500 font-medium leading-5">
                 {touched.city && errors.city ? errors.city : "\u00A0"}
               </div>
             </div>
 
             {/* Postal Code */}
             <div>
-              <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-1">
-                Zip / Postal Code <span className="text-red-400">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-stone-700 text-xs font-semibold uppercase tracking-wider">
+                  Zip / Postal Code <span className="text-red-500">*</span>
+                </label>
+                <span
+                  className={`text-[11px] font-mono ${
+                    (newAddr.postal_code || "").length >= 10
+                      ? "text-red-600 font-bold"
+                      : (newAddr.postal_code || "").length >= 8
+                      ? "text-amber-600"
+                      : "text-stone-400"
+                  }`}
+                >
+                  {(newAddr.postal_code || "").length}/10
+                </span>
+              </div>
               <input
                 type="text"
+                maxLength={10}
                 suppressHydrationWarning
                 value={newAddr.postal_code}
                 onChange={(e) => {
-                  setNewAddr({ ...newAddr, postal_code: e.target.value });
+                  setNewAddr({ ...newAddr, postal_code: e.target.value.toUpperCase() });
                   setTouched((prev) => ({ ...prev, postal_code: true }));
                 }}
                 onBlur={() => setTouched((prev) => ({ ...prev, postal_code: true }))}
-                placeholder="Zip / Postal Code"
-                className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition ${
+                placeholder="e.g. 10001 or SW1A 1AA"
+                className={`w-full bg-[#FFFFFF] border rounded-xl px-4 py-2.5 text-[#2C2A29] text-sm focus:outline-none transition font-mono shadow-xs ${
                   touched.postal_code && errors.postal_code
-                    ? "border-red-500 focus:border-red-500 bg-red-950/10"
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
                     : touched.postal_code && !errors.postal_code && newAddr.postal_code
                     ? "border-emerald-500/80 focus:border-emerald-500"
-                    : "border-slate-800 focus:border-indigo-500"
+                    : "border-[#D8D4CE] focus:border-[#1E3A5F]"
                 }`}
               />
-              <div className="h-5 mt-1 text-xs text-red-400 font-medium leading-5">
-                {touched.postal_code && errors.postal_code ? errors.postal_code : "\u00A0"}
+              <div className="flex items-center justify-between mt-1 text-xs">
+                <span className="text-red-500 font-medium">
+                  {touched.postal_code && errors.postal_code ? errors.postal_code : ""}
+                </span>
+                <span className="text-[11px] text-stone-400">Max 10 characters</span>
               </div>
             </div>
           </div>
@@ -242,25 +276,25 @@ export default function AddressFormModal({
               id="is_default"
               checked={newAddr.is_default}
               onChange={(e) => setNewAddr({ ...newAddr, is_default: e.target.checked })}
-              className="w-4 h-4 rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              className="w-4 h-4 rounded bg-[#FFFFFF] border-[#D8D4CE] text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
             />
-            <label htmlFor="is_default" className="text-slate-300 text-xs cursor-pointer select-none">
+            <label htmlFor="is_default" className="text-stone-700 text-xs cursor-pointer select-none">
               Set as default shipping address
             </label>
           </div>
 
           {/* Submit / Cancel Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800 mt-2">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#DDD6C8] mt-2">
             <button
               type="button"
               onClick={onCancel}
-              className="text-slate-400 hover:text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer"
+              className="text-stone-600 hover:text-[#2C2A29] text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20 cursor-pointer"
+              className="bg-[#1E3A5F] hover:bg-[#152843] text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition shadow-xs cursor-pointer"
             >
               {editingAddrId ? "Update Address" : "Save Address"}
             </button>
