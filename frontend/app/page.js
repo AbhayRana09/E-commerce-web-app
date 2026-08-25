@@ -308,7 +308,7 @@ function HomeContent() {
                           !isAvailable
                             ? "Out of stock"
                             : isMaxStockReached
-                            ? `Maximum available stock (${stock}) reached`
+                            ? "Out of stock"
                             : "Add to cart"
                         }
                       >

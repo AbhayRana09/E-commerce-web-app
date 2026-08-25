@@ -158,7 +158,7 @@ function CartContent() {
                     </p>
                     {isAtMaxStock && (
                       <p className="text-[10px] font-medium text-amber-800">
-                        ⚠️ Maximum available stock reached ({maxStock})
+                        ⚠️ Out of stock
                       </p>
                     )}
                   </div>
@@ -183,7 +183,7 @@ function CartContent() {
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={loading || isAtMaxStock}
                       className="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                      title={isAtMaxStock ? "Max stock reached" : "Increase quantity"}
+                      title={isAtMaxStock ? "Out of stock" : "Increase quantity"}
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>

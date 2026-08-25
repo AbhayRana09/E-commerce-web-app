@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { validateFirstName, validateLastName } from "@/lib/validation";
@@ -29,7 +28,6 @@ export default function EditProfileModal({ open, onOpenChange }) {
   });
 
   const [loading, setLoading] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Adjust state during render when modal opens (official React pattern)
   const [prevOpen, setPrevOpen] = useState(open);
@@ -44,7 +42,6 @@ export default function EditProfileModal({ open, onOpenChange }) {
         first_name: false,
         last_name: false,
       });
-      setShowConfirmModal(false);
     }
   }
 
@@ -69,7 +66,7 @@ export default function EditProfileModal({ open, onOpenChange }) {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     setTouched({ first_name: true, last_name: true });
 
@@ -83,12 +80,6 @@ export default function EditProfileModal({ open, onOpenChange }) {
       return;
     }
 
-    // Open confirmation modal
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirmedProfileUpdate = async () => {
-    setShowConfirmModal(false);
     try {
       setLoading(true);
       const updatedUser = await api.put("/api/auth/profile", {
@@ -257,16 +248,6 @@ export default function EditProfileModal({ open, onOpenChange }) {
           </form>
         </DialogContent>
       </Dialog>
-
-      {/* Confirmation Dialog */}
-      <ConfirmDialog
-        open={showConfirmModal}
-        onOpenChange={setShowConfirmModal}
-        title="Confirm Profile Changes"
-        message="Are you sure you want to update your profile information?"
-        actionType="save"
-        onConfirm={handleConfirmedProfileUpdate}
-      />
     </>
   );
 }

@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="bg-[#F7F5F0] text-[#2C2A29] min-h-screen flex flex-col font-sans selection:bg-[#1E3A5F] selection:text-white antialiased">
         <ToastProvider>
           <AuthProvider>

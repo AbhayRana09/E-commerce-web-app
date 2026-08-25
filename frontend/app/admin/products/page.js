@@ -35,7 +35,6 @@ export default function AdminProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [productToDelete, setProductToDelete] = useState(null);
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   // Image upload mode: 'file' | 'url'
   const [imageInputMode, setImageInputMode] = useState("file");
@@ -204,11 +203,7 @@ export default function AdminProductsPage() {
       return;
     }
 
-    if (editingProduct) {
-      setShowSaveConfirm(true);
-    } else {
-      executeSave();
-    }
+    executeSave();
   };
 
   const executeSave = async () => {
@@ -232,7 +227,6 @@ export default function AdminProductsPage() {
         showToast("Product created successfully!", "success");
       }
 
-      setShowSaveConfirm(false);
       setIsModalOpen(false);
       await loadData();
     } catch (err) {
@@ -340,17 +334,6 @@ export default function AdminProductsPage() {
         actionType="delete"
         submitting={submitting}
         onConfirm={executeDelete}
-      />
-
-      {/* Save Edit Confirmation Modal */}
-      <ConfirmDialog
-        open={showSaveConfirm}
-        onOpenChange={setShowSaveConfirm}
-        title="Save Changes"
-        message={`Are you sure you want to save the changes for "${editingProduct?.name}"?`}
-        actionType="save"
-        submitting={submitting}
-        onConfirm={executeSave}
       />
     </div>
   );

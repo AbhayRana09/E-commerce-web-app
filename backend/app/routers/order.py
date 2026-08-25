@@ -254,7 +254,7 @@ async def create_order(
             "coupon_id": coupon_id,
             "status": "PENDING" if payload.payment_method != "COD" else "CONFIRMED",
             "payment_method": payload.payment_method,
-            "payment_status": "PENDING" if payload.payment_method != "COD" else "COD_PENDING",
+            "payment_status": "PENDING",
             "subtotal": subtotal,
             "shipping_cost": shipping_cost,
             "discount": discount,
@@ -319,8 +319,8 @@ async def simulate_order_payment(
             "status": "PAYMENT_FAILED"
         }
 
-    # Success or COD: Mark order as CONFIRMED
-    payment_status = "COD_PENDING" if payload.payment_method == "COD" else "PAID"
+    # Success or COD: Mark order as CONFIRMED, COD payment_status remains PENDING
+    payment_status = "PENDING" if payload.payment_method == "COD" else "PAID"
     updated = await db.order.update(
         where={"id": order_id},
         data=cast(Any, {

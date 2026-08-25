@@ -196,15 +196,7 @@ function ProfileContent() {
       return;
     }
 
-    setConfirmModal({
-      open: true,
-      title: editingAddrId ? "Update Shipping Address" : "Save Shipping Address",
-      message: editingAddrId
-        ? "Are you sure you want to update this shipping address?"
-        : "Are you sure you want to save this new shipping address?",
-      actionType: "save",
-      targetId: editingAddrId,
-    });
+    await executeSaveAddress();
   };
 
   const executeSaveAddress = async () => {
@@ -234,24 +226,8 @@ function ProfileContent() {
   };
 
   const handleCancelAddress = () => {
-    const hasData =
-      newAddr.street.trim() ||
-      newAddr.country.trim() ||
-      newAddr.state.trim() ||
-      newAddr.city.trim() ||
-      newAddr.postal_code.trim();
-
-    if (hasData) {
-      setConfirmModal({
-        open: true,
-        title: "Discard Unsaved Changes",
-        message: "Are you sure you want to cancel? Any unsaved address changes will be lost.",
-        actionType: "cancel",
-        targetId: null,
-      });
-    } else {
-      setShowAddModal(false);
-    }
+    setShowAddModal(false);
+    setEditingAddrId(null);
   };
 
   const promptSetDefault = (addressId) => {
@@ -301,10 +277,6 @@ function ProfileContent() {
         await api.delete(`/api/addresses/${targetId}`);
         showToast("Address removed.", "success");
         fetchAddresses();
-      } else if (actionType === "save") {
-        await executeSaveAddress();
-      } else if (actionType === "cancel") {
-        setShowAddModal(false);
       }
     } catch (err) {
       showToast(err.message || "Action failed.", "error");

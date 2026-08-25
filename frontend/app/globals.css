@@ -17,21 +17,27 @@ body {
   font-family: var(--font-plus-jakarta), sans-serif;
 }
 
-/* Custom smooth scrollbar */
+/* Sleek modern scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #EAE6DD;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D1C9BC;
+  background: #D8D2C4;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B5AB9C;
+  background: #B8B0A0;
+}
+
+/* Firefox scrollbar standard */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D8D2C4 transparent;
 }

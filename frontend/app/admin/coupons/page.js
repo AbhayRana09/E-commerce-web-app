@@ -26,7 +26,6 @@ export default function AdminCouponsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Confirmation dialogs
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [couponToDelete, setCouponToDelete] = useState(null);
 
   const getTodayISO = () => {
@@ -164,11 +163,7 @@ export default function AdminCouponsPage() {
       return;
     }
 
-    if (editingCoupon) {
-      setShowSaveConfirm(true);
-    } else {
-      await executeSaveCoupon();
-    }
+    await executeSaveCoupon();
   };
 
   const executeSaveCoupon = async () => {
@@ -192,7 +187,6 @@ export default function AdminCouponsPage() {
         showToast("Coupon created successfully!", "success");
       }
 
-      setShowSaveConfirm(false);
       handleCloseModal();
       loadCoupons();
     } catch (err) {
@@ -232,6 +226,16 @@ export default function AdminCouponsPage() {
   };
 
   const activeCount = coupons.filter((c) => c.is_active).length;
+
+  const filteredCoupons = useMemo(() => {
+    if (!search.trim()) return coupons;
+    const term = search.toLowerCase().trim();
+    return coupons.filter(
+      (c) =>
+        c.code.toLowerCase().includes(term) ||
+        (c.description && c.description.toLowerCase().includes(term))
+    );
+  }, [coupons, search]);
 
   return (
     <div className="space-y-8">
@@ -281,13 +285,13 @@ export default function AdminCouponsPage() {
           />
         </div>
         <span className="text-xs text-stone-600">
-          Showing {coupons.length} coupon{coupons.length === 1 ? "" : "s"}
+          Showing {filteredCoupons.length} coupon{filteredCoupons.length === 1 ? "" : "s"}
         </span>
       </div>
 
-      {/* Coupons Table */}
+      {/* Table */}
       <CouponTable
-        coupons={coupons}
+        coupons={filteredCoupons}
         loading={loading}
         onToggleStatus={handleToggleStatus}
         onEdit={handleOpenModal}
@@ -310,17 +314,7 @@ export default function AdminCouponsPage() {
         getTodayISO={getTodayISO}
       />
 
-      {/* Save Changes Confirmation Dialog */}
-      <ConfirmDialog
-        open={showSaveConfirm}
-        onOpenChange={setShowSaveConfirm}
-        title="Confirm Coupon Changes"
-        message={`Are you sure you want to save changes to coupon '${formData.code.trim().toUpperCase()}'?`}
-        actionType="save"
-        onConfirm={executeSaveCoupon}
-      />
-
-      {/* Delete Coupon Confirmation Dialog */}
+      {/* Delete Coupon Confirmation Dialog (Direct Page-Level) */}
       <ConfirmDialog
         open={!!couponToDelete}
         onOpenChange={(open) => !open && setCouponToDelete(null)}

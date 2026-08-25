@@ -55,7 +55,7 @@ export default function CheckoutStepper({ currentStep, onStepClick, canNavigateT
               currentStep >= 2 ? "text-[#2C2A29]" : "text-stone-500"
             }`}
           >
-            Review & Offers
+            Order Summary
           </span>
         </button>
 

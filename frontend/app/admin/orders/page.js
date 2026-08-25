@@ -364,14 +364,14 @@ export default function AdminOrdersPage() {
               setSelectedOrder(null);
             }
           }}
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 cursor-pointer"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 z-50 animate-in fade-in duration-150 cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto cursor-default"
+            className="bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl max-w-2xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden cursor-default"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[#DDD6C8] pb-4">
+            <div className="flex items-center justify-between border-b border-[#DDD6C8] px-6 sm:px-8 py-5 shrink-0 bg-[#F7F5F0]">
               <div>
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-bold text-[#2C2A29] tracking-tight">
@@ -385,7 +385,7 @@ export default function AdminOrdersPage() {
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-stone-400 hover:text-[#2C2A29] p-1 rounded-lg hover:bg-[#ECE8DF] transition cursor-pointer"
+                className="text-stone-400 hover:text-[#2C2A29] p-1.5 rounded-lg hover:bg-[#ECE8DF] transition cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -393,108 +393,111 @@ export default function AdminOrdersPage() {
               </button>
             </div>
 
-            {/* Customer & Address Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl p-4 space-y-1.5 shadow-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
-                  Customer Information
-                </span>
-                <p className="text-sm font-semibold text-[#2C2A29]">
-                  {selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : "Guest Customer"}
-                </p>
-                <p className="text-xs text-stone-600">{selectedOrder.user?.email || "No email"}</p>
-              </div>
-
-              <div className="bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl p-4 space-y-1.5 shadow-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
-                  Delivery Address
-                </span>
-                {selectedOrder.address ? (
-                  <p className="text-xs text-[#2C2A29] leading-relaxed">
-                    {selectedOrder.address.street}<br />
-                    {selectedOrder.address.city}, {selectedOrder.address.state} {selectedOrder.address.postal_code}<br />
-                    {selectedOrder.address.country}
+            {/* Modal Inner Scrollable Body */}
+            <div className="overflow-y-auto flex-1 px-6 sm:px-8 py-6 space-y-6">
+              {/* Customer & Address Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl p-4 space-y-1.5 shadow-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                    Customer Information
+                  </span>
+                  <p className="text-sm font-semibold text-[#2C2A29]">
+                    {selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : "Guest Customer"}
                   </p>
-                ) : (
-                  <p className="text-xs text-stone-500">No address recorded</p>
-                )}
-              </div>
-            </div>
+                  <p className="text-xs text-stone-600">{selectedOrder.user?.email || "No email"}</p>
+                </div>
 
-            {/* Cancellation Reason if Cancelled */}
-            {selectedOrder.status === "CANCELLED" && selectedOrder.cancellation_reason && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-xs text-red-700 flex items-start gap-3">
-                <span className="text-base">⚠️</span>
-                <div>
-                  <span className="font-bold text-red-800 block">Cancellation Reason</span>
-                  <p className="mt-0.5 italic text-stone-700 break-words [overflow-wrap:anywhere]">
-                    &ldquo;{selectedOrder.cancellation_reason}&rdquo;
-                  </p>
+                <div className="bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl p-4 space-y-1.5 shadow-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                    Delivery Address
+                  </span>
+                  {selectedOrder.address ? (
+                    <p className="text-xs text-[#2C2A29] leading-relaxed">
+                      {selectedOrder.address.street}<br />
+                      {selectedOrder.address.city}, {selectedOrder.address.state} {selectedOrder.address.postal_code}<br />
+                      {selectedOrder.address.country}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-stone-500">No address recorded</p>
+                  )}
                 </div>
               </div>
-            )}
 
-            {/* Order Items */}
-            <div className="space-y-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-500 block">
-                Purchased Items ({selectedOrder.items?.length || 0})
-              </span>
-              <div className="border border-[#D8D4CE] rounded-2xl divide-y divide-[#D8D4CE] overflow-hidden shadow-xs">
-                {selectedOrder.items?.map((item) => (
-                  <div key={item.id} className="p-3.5 flex items-center justify-between bg-[#FFFFFF]">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#F7F5F0] border border-[#D8D4CE] overflow-hidden shrink-0 flex items-center justify-center">
-                        {item.product?.image_url ? (
-                          <img
-                            src={item.product.image_url}
-                            alt={item.product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xs text-stone-400">🛍️</span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-[#2C2A29]">
-                          {item.product?.name || `Product #${item.product_id}`}
-                        </p>
-                        <p className="text-[11px] text-stone-600">
-                          ${item.price_at_purchase.toFixed(2)} × {item.quantity}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold text-[#2C2A29] font-mono">
-                      ${(item.price_at_purchase * item.quantity).toFixed(2)}
-                    </span>
+              {/* Cancellation Reason if Cancelled */}
+              {selectedOrder.status === "CANCELLED" && selectedOrder.cancellation_reason && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-xs text-red-700 flex items-start gap-3">
+                  <span className="text-base">⚠️</span>
+                  <div>
+                    <span className="font-bold text-red-800 block">Cancellation Reason</span>
+                    <p className="mt-0.5 italic text-stone-700 break-words [overflow-wrap:anywhere]">
+                      &ldquo;{selectedOrder.cancellation_reason}&rdquo;
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Financial Summary */}
-            <div className="bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl p-4 space-y-2 text-xs shadow-xs">
-              <div className="flex justify-between text-stone-600">
-                <span>Subtotal</span>
-                <span className="font-mono text-[#2C2A29]">${selectedOrder.subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-stone-600">
-                <span>Shipping Cost</span>
-                <span className="font-mono text-[#2C2A29]">${selectedOrder.shipping_cost.toFixed(2)}</span>
-              </div>
-              {selectedOrder.discount > 0 && (
-                <div className="flex justify-between text-emerald-700">
-                  <span>Discount Applied</span>
-                  <span className="font-mono">-${selectedOrder.discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="pt-2 border-t border-[#D8D4CE] flex justify-between text-sm font-bold text-[#2C2A29]">
-                <span>Total Amount</span>
-                <span className="font-mono text-[#1E3A5F]">${selectedOrder.total_amount.toFixed(2)}</span>
+
+              {/* Order Items */}
+              <div className="space-y-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-500 block">
+                  Purchased Items ({selectedOrder.items?.length || 0})
+                </span>
+                <div className="border border-[#D8D4CE] rounded-2xl divide-y divide-[#D8D4CE] overflow-hidden shadow-xs">
+                  {selectedOrder.items?.map((item) => (
+                    <div key={item.id} className="p-3.5 flex items-center justify-between bg-[#FFFFFF]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#F7F5F0] border border-[#D8D4CE] overflow-hidden shrink-0 flex items-center justify-center">
+                          {item.product?.image_url ? (
+                            <img
+                              src={item.product.image_url}
+                              alt={item.product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xs text-stone-400">🛍️</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-[#2C2A29]">
+                            {item.product?.name || `Product #${item.product_id}`}
+                          </p>
+                          <p className="text-[11px] text-stone-600">
+                            ${item.price_at_purchase.toFixed(2)} × {item.quantity}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-[#2C2A29] font-mono">
+                        ${(item.price_at_purchase * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Financial Summary */}
+              <div className="bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl p-4 space-y-2 text-xs shadow-xs">
+                <div className="flex justify-between text-stone-600">
+                  <span>Subtotal</span>
+                  <span className="font-mono text-[#2C2A29]">${selectedOrder.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-stone-600">
+                  <span>Shipping Cost</span>
+                  <span className="font-mono text-[#2C2A29]">${selectedOrder.shipping_cost.toFixed(2)}</span>
+                </div>
+                {selectedOrder.discount > 0 && (
+                  <div className="flex justify-between text-emerald-700">
+                    <span>Discount Applied</span>
+                    <span className="font-mono">-${selectedOrder.discount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="pt-2 border-t border-[#D8D4CE] flex justify-between text-sm font-bold text-[#2C2A29]">
+                  <span>Total Amount</span>
+                  <span className="font-mono text-[#1E3A5F]">${selectedOrder.total_amount.toFixed(2)}</span>
+                </div>
               </div>
             </div>
 
-            {/* Close Button */}
-            <div className="pt-2">
+            {/* Modal Footer */}
+            <div className="border-t border-[#DDD6C8] px-6 sm:px-8 py-4 shrink-0 bg-[#F7F5F0]">
               <button
                 type="button"
                 onClick={() => setSelectedOrder(null)}

@@ -14,10 +14,10 @@ import {
   Heart,
   User,
   ShoppingBag,
-  LayoutDashboard,
   LogOut,
   ChevronDown,
   ShieldCheck,
+  X,
 } from "lucide-react";
 
 function NavbarContent() {
@@ -38,8 +38,25 @@ function NavbarContent() {
   const isSuperAdmin = user?.role === "ADMIN";
   const isHome = pathname === "/";
 
+  const isAuthRoute =
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/register") ||
+    pathname?.startsWith("/forgot-password") ||
+    pathname?.startsWith("/reset-password") ||
+    pathname?.startsWith("/verify-email");
+
+  if (isAuthRoute) {
+    return null;
+  }
+
   const currentSearch = searchParams?.get("search") || "";
   const currentCategory = searchParams?.get("category_id") || "";
+  const [searchInput, setSearchInput] = useState(currentSearch);
+
+  // Keep search input synced with URL search parameter
+  useEffect(() => {
+    setSearchInput(currentSearch);
+  }, [currentSearch]);
 
   // Load categories for secondary category sub-navbar
   useEffect(() => {
@@ -54,27 +71,26 @@ function NavbarContent() {
     loadCats();
   }, []);
 
-  // Update URL search or category filters
+  // Global search from header (clears category filter to search full catalog)
   const handleSearchChange = (val) => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    if (val && val.trim()) {
-      params.set("search", val);
-    } else {
-      params.delete("search");
+    const trimmed = (val || "").trim();
+    const params = new URLSearchParams();
+    if (trimmed) {
+      params.set("search", trimmed);
+      params.set("page", "1");
     }
-    params.set("page", "1");
     const query = params.toString();
     router.push(`/${query ? `?${query}` : ""}`);
   };
 
+  // Category selection from sub-navbar (clears search query to cleanly display category products)
   const handleCategorySelect = (catId) => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
+    setSearchInput("");
+    const params = new URLSearchParams();
     if (catId) {
       params.set("category_id", catId);
-    } else {
-      params.delete("category_id");
+      params.set("page", "1");
     }
-    params.set("page", "1");
     const query = params.toString();
     router.push(`/${query ? `?${query}` : ""}`);
   };
@@ -131,20 +147,34 @@ function NavbarContent() {
               <input
                 type="text"
                 placeholder="Search products by title, category, or tags..."
-                defaultValue={currentSearch}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleSearchChange(e.target.value);
+                    handleSearchChange(searchInput);
                   }
                 }}
-                onBlur={(e) => {
-                  if (e.target.value !== currentSearch) {
-                    handleSearchChange(e.target.value);
+                onBlur={() => {
+                  if (searchInput.trim() !== currentSearch.trim()) {
+                    handleSearchChange(searchInput);
                   }
                 }}
-                className="w-full bg-[#FFFFFF] border border-[#D8D4CE] focus:border-[#1E3A5F] rounded-xl px-4 py-2 pl-10 text-xs sm:text-sm text-[#2C2A29] placeholder:text-stone-400 focus:outline-none transition shadow-xs"
+                className="w-full bg-[#FFFFFF] border border-[#D8D4CE] focus:border-[#1E3A5F] rounded-xl px-4 py-2 pl-10 pr-9 text-xs sm:text-sm text-[#2C2A29] placeholder:text-stone-400 focus:outline-none transition shadow-xs"
               />
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput("");
+                    handleSearchChange("");
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#2C2A29] p-0.5 rounded-md transition cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -211,18 +241,6 @@ function NavbarContent() {
                     <p className="text-[11px] text-stone-500 truncate mt-0.5">{user.email}</p>
                   </div>
 
-                  {/* Admin Dashboard Link */}
-                  {isSuperAdmin && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#1E3A5F] hover:bg-[#ECE8DF] transition"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-[#1E3A5F]" />
-                      Admin Dashboard
-                    </Link>
-                  )}
-
                   {/* My Profile Link */}
                   <Link
                     href="/profile"
@@ -232,18 +250,6 @@ function NavbarContent() {
                     <User className="w-4 h-4 text-stone-500" />
                     My Profile
                   </Link>
-
-                  {/* My Wishlist Link */}
-                  {!isSuperAdmin && !isAdminRoute && (
-                    <Link
-                      href="/wishlist"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition"
-                    >
-                      <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-                      My Wishlist ({totalWishlistItems})
-                    </Link>
-                  )}
 
                   {/* My Orders Link (Only for Regular Users) */}
                   {!isSuperAdmin && !isAdminRoute && (
@@ -276,20 +282,12 @@ function NavbarContent() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs"
-              >
-                Register
-              </Link>
-            </div>
+            <Link
+              href="/login"
+              className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs"
+            >
+              Login
+            </Link>
           )}
 
           {/* Wishlist & Shopping Cart Icons (Hidden on Admin & Profile Pages) */}
@@ -360,7 +358,7 @@ function NavbarContent() {
               type="button"
               onClick={() => handleCategorySelect("")}
               className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
-                isHome && currentCategory === ""
+                isHome && currentCategory === "" && !currentSearch
                   ? "bg-[#1E3A5F] border-[#1E3A5F] text-white shadow-xs"
                   : "bg-[#FFFFFF] border-[#D8D4CE] text-stone-700 hover:bg-[#ECE8DF] hover:text-[#2C2A29]"
               }`}
@@ -369,7 +367,7 @@ function NavbarContent() {
             </button>
 
             {categories.map((cat) => {
-              const isSelected = isHome && String(currentCategory) === String(cat.id);
+              const isSelected = isHome && String(currentCategory) === String(cat.id) && !currentSearch;
               return (
                 <button
                   key={cat.id}
@@ -393,6 +391,18 @@ function NavbarContent() {
 }
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const isAuthRoute =
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/register") ||
+    pathname?.startsWith("/forgot-password") ||
+    pathname?.startsWith("/reset-password") ||
+    pathname?.startsWith("/verify-email");
+
+  if (isAuthRoute) {
+    return null;
+  }
+
   return (
     <Suspense fallback={<nav className="bg-[#F7F5F0] h-16 border-b border-[#DDD6C8]"></nav>}>
       <NavbarContent />

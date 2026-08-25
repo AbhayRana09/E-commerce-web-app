@@ -37,13 +37,13 @@ export default function CouponFormModal({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm cursor-pointer"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl p-6 sm:p-8 max-w-2xl sm:max-w-3xl w-[95vw] shadow-2xl space-y-6 cursor-default"
+        className="bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl max-w-2xl sm:max-w-3xl w-[95vw] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden cursor-default"
       >
-        <div className="flex items-center justify-between border-b border-[#DDD6C8] pb-4">
+        <div className="flex items-center justify-between border-b border-[#DDD6C8] px-6 sm:px-8 py-5 shrink-0 bg-[#F7F5F0]">
           <h2 className="text-lg sm:text-xl font-bold text-[#2C2A29]">
             {editingCoupon ? "Edit Coupon" : "Create New Coupon"}
           </h2>
@@ -56,7 +56,8 @@ export default function CouponFormModal({
           </button>
         </div>
 
-        <form onSubmit={onSubmit} noValidate className="space-y-4 text-xs sm:text-sm">
+        <form onSubmit={onSubmit} noValidate className="flex flex-col flex-1 min-h-0 overflow-hidden text-xs sm:text-sm">
+          <div className="overflow-y-auto flex-1 px-6 sm:px-8 py-6 space-y-4">
           {/* Code */}
           <div>
             <div className="flex items-center justify-between mb-1">
@@ -210,8 +211,10 @@ export default function CouponFormModal({
             />
           </div>
 
+          </div>
+
           {/* Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-5 border-t border-[#DDD6C8]">
+          <div className="flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-[#DDD6C8] shrink-0 bg-[#F7F5F0]">
             <button
               type="button"
               onClick={onClose}

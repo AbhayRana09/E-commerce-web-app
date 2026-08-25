@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getMyOrders, cancelOrder } from "@/lib/orders";
 import { useToast } from "@/context/ToastContext";
 import RouteGuard from "@/components/RouteGuard";
+import { MoreVertical, FileText, XCircle } from "lucide-react";
 
 function OrdersContent() {
   const { showToast } = useToast();
@@ -14,6 +15,7 @@ function OrdersContent() {
   const [orderToCancel, setOrderToCancel] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -31,7 +33,19 @@ function OrdersContent() {
     fetchOrders();
   }, [fetchOrders]);
 
+  // Close 3-dot dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside() {
+      setActiveDropdownId(null);
+    }
+    if (activeDropdownId !== null) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [activeDropdownId]);
+
   const handleOpenCancelModal = (order) => {
+    setActiveDropdownId(null);
     setOrderToCancel(order);
     setCancelReason("");
   };
@@ -136,30 +150,28 @@ function OrdersContent() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           {orders.map((order) => (
             <div
               key={order.id}
-              className="bg-[#ECE8DF] border border-[#DDD6C8] hover:border-[#1E3A5F] rounded-3xl p-6 sm:p-8 transition shadow-xs space-y-5"
+              className="bg-[#ECE8DF] border border-[#DDD6C8] hover:border-[#1E3A5F]/60 rounded-3xl p-5 sm:p-7 transition shadow-xs space-y-5"
             >
               {/* Order Meta Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#DDD6C8] text-xs sm:text-sm">
-                <div className="flex flex-wrap items-center gap-4 font-mono">
-                  <span className="bg-[#FFFFFF] border border-[#D8D4CE] px-3.5 py-1.5 rounded-xl text-[#2C2A29] font-bold text-sm shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#DDD6C8]">
+                <div className="flex items-center gap-3">
+                  <span className="bg-[#FFFFFF] border border-[#D8D4CE] px-3 py-1 rounded-xl text-[#2C2A29] font-bold text-xs sm:text-sm font-mono shadow-xs">
                     Order #{order.id}
                   </span>
-                  <span className="text-stone-600">
-                    {new Date(order.created_at).toLocaleDateString("en-US", {
+                  <span className="text-xs sm:text-sm text-stone-600 font-medium">
+                    Placed on {new Date(order.created_at).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
                     })}
                   </span>
-                  <span className="text-stone-500">
-                    • Method: <strong className="text-[#2C2A29]">{order.payment_method === "MOCK_CARD" ? "Card" : order.payment_method === "MOCK_UPI" ? "UPI" : order.payment_method || "Card"}</strong>
-                  </span>
                 </div>
 
+                {/* Top Right: Status Badge & 3-Dot Dropdown Menu */}
                 <div className="flex items-center gap-3">
                   <span
                     className={`text-xs font-bold px-3 py-1 rounded-full border uppercase tracking-wider ${getStatusBadge(
@@ -168,58 +180,100 @@ function OrdersContent() {
                   >
                     {order.status}
                   </span>
-                  {(order.status === "PENDING" || order.status === "CONFIRMED") && (
+
+                  {/* 3-Dot Action Dropdown */}
+                  <div className="relative">
                     <button
                       type="button"
-                      onClick={() => handleOpenCancelModal(order)}
-                      className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition border border-rose-200 cursor-pointer"
-                      title="Cancel this eligible order"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDropdownId((prev) => (prev === order.id ? null : order.id));
+                      }}
+                      className="w-8 h-8 rounded-xl bg-[#FFFFFF] hover:bg-[#ECE8DF] border border-[#D8D4CE] flex items-center justify-center text-[#2C2A29] transition cursor-pointer shadow-xs"
+                      title="More Options"
+                      aria-label="Order actions"
                     >
-                      Cancel Order
+                      <MoreVertical className="w-4 h-4" />
                     </button>
-                  )}
-                  <button
-                    onClick={() => setSelectedOrder(order)}
-                    className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl transition border border-[#D8D4CE] cursor-pointer shadow-xs"
-                  >
-                    View Receipt
-                  </button>
+
+                    {activeDropdownId === order.id && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute right-0 mt-1.5 w-44 bg-[#FFFFFF] border border-[#D8D4CE] rounded-2xl shadow-xl p-1.5 z-30 space-y-1 animate-in fade-in zoom-in-95 duration-100"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveDropdownId(null);
+                            setSelectedOrder(order);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition cursor-pointer text-left"
+                        >
+                          <FileText className="w-4 h-4 text-[#1E3A5F]" />
+                          <span>View Receipt</span>
+                        </button>
+
+                        {(order.status === "PENDING" || order.status === "CONFIRMED") && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenCancelModal(order)}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer text-left"
+                          >
+                            <XCircle className="w-4 h-4 text-rose-500" />
+                            <span>Cancel Order</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Items Thumbnails & Total */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-                <div className="flex items-center gap-4 overflow-x-auto py-1">
-                  {order.items?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="w-16 h-16 rounded-2xl bg-[#FFFFFF] border border-[#D8D4CE] overflow-hidden shrink-0 relative group shadow-xs"
-                      title={`${item.product?.name} (${item.quantity}x)`}
-                    >
-                      {item.product?.image_url ? (
-                        <img
-                          src={item.product.image_url}
-                          alt={item.product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-stone-400">
-                          Item
-                        </div>
-                      )}
-                      <span className="absolute bottom-0 right-0 bg-[#2C2A29]/90 text-white font-mono text-xs font-bold px-1.5 rounded-tl-lg">
-                        &times;{item.quantity}
-                      </span>
-                    </div>
-                  ))}
-                  <span className="text-sm text-stone-600 font-medium pl-2">
-                    {order.items?.length} item{order.items?.length === 1 ? "" : "s"}
-                  </span>
-                </div>
+              {/* Order Products List */}
+              <div className="divide-y divide-[#DDD6C8]">
+                {order.items?.map((item) => (
+                  <div
+                    key={item.id}
+                    className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4"
+                  >
+                    {/* Left: Product Thumbnail & Details */}
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-[#FFFFFF] border border-[#D8D4CE] overflow-hidden shrink-0 shadow-xs relative">
+                        {item.product?.image_url ? (
+                          <img
+                            src={item.product.image_url}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-stone-400">
+                            Item
+                          </div>
+                        )}
+                      </div>
 
-                <div className="text-left sm:text-right shrink-0">
-                  <span className="text-xs text-stone-500 uppercase block font-semibold">Total Paid</span>
-                  <span className="text-2xl font-extrabold text-[#2C2A29] font-mono">
+                      <div className="min-w-0 space-y-1">
+                        <h4 className="font-bold text-sm sm:text-base text-[#2C2A29] line-clamp-1 break-words">
+                          {item.product?.name || "Product Item"}
+                        </h4>
+                        <div className="flex items-center gap-2.5 text-xs text-stone-600 font-medium pt-0.5">
+                          <span className="bg-[#FFFFFF] px-2.5 py-0.5 rounded-lg border border-[#D8D4CE] shadow-xs">
+                            Qty: <strong className="text-[#2C2A29]">{item.quantity}</strong>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Order Summary Footer: Total Paid */}
+              <div className="pt-4 border-t border-[#DDD6C8] flex items-center justify-end">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs text-stone-500 uppercase font-semibold tracking-wider">
+                    Total Paid:
+                  </span>
+                  <span className="text-xl sm:text-2xl font-extrabold text-[#2C2A29] font-mono">
                     ${Number(order.total_amount).toFixed(2)}
                   </span>
                 </div>
@@ -237,13 +291,14 @@ function OrdersContent() {
               setSelectedOrder(null);
             }
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl p-6 sm:p-8 max-w-3xl sm:max-w-4xl w-[95vw] shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto cursor-default"
+            className="bg-[#F7F5F0] border border-[#DDD6C8] rounded-3xl max-w-3xl sm:max-w-4xl w-[95vw] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden cursor-default animate-in fade-in zoom-in-95 duration-150"
           >
-            <div className="flex items-center justify-between border-b border-[#DDD6C8] pb-4">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#DDD6C8] px-6 sm:px-8 py-5 shrink-0 bg-[#F7F5F0]">
               <div>
                 <h2 className="text-xl font-bold text-[#2C2A29]">Order #{selectedOrder.id} Receipt</h2>
                 <span className="text-xs text-stone-500 font-mono">
@@ -252,87 +307,97 @@ function OrdersContent() {
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-stone-400 hover:text-[#2C2A29] transition p-2 rounded-xl hover:bg-[#ECE8DF]"
+                className="text-stone-400 hover:text-[#2C2A29] transition p-2 rounded-xl hover:bg-[#ECE8DF] cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            {/* Cancellation Reason Notice if Cancelled */}
-            {selectedOrder.status === "CANCELLED" && selectedOrder.cancellation_reason && (
-              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs sm:text-sm text-rose-700 flex items-start gap-3">
-                <span className="text-base">ℹ️</span>
-                <div>
-                  <span className="font-bold text-rose-800 block">Cancellation Reason</span>
-                  <p className="mt-0.5 italic text-stone-700 break-words [overflow-wrap:anywhere]">
-                    &ldquo;{selectedOrder.cancellation_reason}&rdquo;
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Delivery Address */}
-            {selectedOrder.address && (
-              <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-2xl p-5 text-sm space-y-1.5 min-w-0 overflow-hidden">
-                <span className="text-xs font-bold text-[#1E3A5F] uppercase tracking-wider block">
-                  Delivery Destination
-                </span>
-                <p className="text-[#2C2A29] font-bold truncate">{selectedOrder.user?.first_name} {selectedOrder.user?.last_name}</p>
-                <p className="text-stone-600 break-words [overflow-wrap:anywhere]">
-                  {selectedOrder.address.street}, {selectedOrder.address.city}, {selectedOrder.address.state} {selectedOrder.address.postal_code}, {selectedOrder.address.country}
-                </p>
-              </div>
-            )}
-
-            {/* Items */}
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
-                Ordered Items
-              </span>
-              <div className="divide-y divide-[#DDD6C8] bg-[#ECE8DF] rounded-2xl border border-[#DDD6C8] p-4 text-sm">
-                {selectedOrder.items?.map((item) => (
-                  <div key={item.id} className="py-3 flex items-center justify-between gap-4">
-                    <span className="text-[#2C2A29] font-medium truncate">
-                      {item.product?.name} &times; {item.quantity}
-                    </span>
-                    <span className="font-mono text-[#2C2A29] font-bold text-sm">
-                      ${(item.quantity * item.price_at_purchase).toFixed(2)}
-                    </span>
+            {/* Modal Scrollable Inner Body */}
+            <div className="overflow-y-auto flex-1 px-6 sm:px-8 py-6 space-y-6">
+              {/* Cancellation Reason Notice if Cancelled */}
+              {selectedOrder.status === "CANCELLED" && selectedOrder.cancellation_reason && (
+                <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs sm:text-sm text-rose-700 flex items-start gap-3">
+                  <span className="text-base">ℹ️</span>
+                  <div>
+                    <span className="font-bold text-rose-800 block">Cancellation Reason</span>
+                    <p className="mt-0.5 italic text-stone-700 break-words [overflow-wrap:anywhere]">
+                      &ldquo;{selectedOrder.cancellation_reason}&rdquo;
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Breakdown */}
-            <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-2xl p-5 space-y-2.5 text-sm">
-              <div className="flex items-center justify-between text-stone-600">
-                <span>Subtotal</span>
-                <span className="font-mono text-[#2C2A29]">${selectedOrder.subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex items-center justify-between text-stone-600">
-                <span>Shipping Fee</span>
-                <span className="font-mono text-[#2C2A29]">
-                  {selectedOrder.shipping_cost === 0 ? "FREE" : `$${selectedOrder.shipping_cost.toFixed(2)}`}
-                </span>
-              </div>
-              {selectedOrder.discount > 0 && (
-                <div className="flex items-center justify-between text-emerald-800">
-                  <span>Discount ({selectedOrder.coupon_code || "COUPON"})</span>
-                  <span className="font-mono font-bold">-${selectedOrder.discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="pt-3 border-t border-[#DDD6C8] flex items-center justify-between font-bold text-base">
-                <span className="text-[#2C2A29]">Total Amount Paid</span>
-                <span className="text-[#2C2A29] font-mono text-xl">${selectedOrder.total_amount.toFixed(2)}</span>
+
+              {/* Delivery Address */}
+              {selectedOrder.address && (
+                <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-2xl p-5 text-sm space-y-1.5 min-w-0 overflow-hidden shadow-xs">
+                  <span className="text-xs font-bold text-[#1E3A5F] uppercase tracking-wider block">
+                    Delivery Destination
+                  </span>
+                  <p className="text-[#2C2A29] font-bold truncate">{selectedOrder.user?.first_name} {selectedOrder.user?.last_name}</p>
+                  <p className="text-stone-600 break-words [overflow-wrap:anywhere]">
+                    {selectedOrder.address.street}, {selectedOrder.address.city}, {selectedOrder.address.state} {selectedOrder.address.postal_code}, {selectedOrder.address.country}
+                  </p>
+                </div>
+              )}
+
+              {/* Items */}
+              <div className="space-y-3">
+                <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                  Ordered Items
+                </span>
+                <div className="divide-y divide-[#DDD6C8] bg-[#ECE8DF] rounded-2xl border border-[#DDD6C8] p-4 text-sm shadow-xs">
+                  {selectedOrder.items?.map((item) => (
+                    <div key={item.id} className="py-3 flex items-center justify-between gap-4">
+                      <span className="text-[#2C2A29] font-medium truncate">
+                        {item.product?.name} &times; {item.quantity}
+                      </span>
+                      <span className="font-mono text-[#2C2A29] font-bold text-sm">
+                        ${(item.quantity * item.price_at_purchase).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Breakdown */}
+              <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-2xl p-5 space-y-2.5 text-sm shadow-xs">
+                <div className="flex items-center justify-between text-stone-600">
+                  <span>Subtotal</span>
+                  <span className="font-mono text-[#2C2A29]">${selectedOrder.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between text-stone-600">
+                  <span>Shipping Fee</span>
+                  <span className="font-mono text-[#2C2A29]">
+                    {selectedOrder.shipping_cost === 0 ? "FREE" : `$${selectedOrder.shipping_cost.toFixed(2)}`}
+                  </span>
+                </div>
+                {selectedOrder.discount > 0 && (
+                  <div className="flex items-center justify-between text-emerald-800">
+                    <span>Discount ({selectedOrder.coupon_code || "COUPON"})</span>
+                    <span className="font-mono font-bold">-${selectedOrder.discount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="pt-3 border-t border-[#DDD6C8] flex items-center justify-between font-bold text-base">
+                  <span className="text-[#2C2A29]">
+                    {selectedOrder.payment_status === "PAID" ? "Total Amount Paid" : "Total Amount Payable"}
+                  </span>
+                  <span className="text-[#2C2A29] font-mono text-xl">${selectedOrder.total_amount.toFixed(2)}</span>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-[#DDD6C8]">
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-[#DDD6C8] px-6 sm:px-8 py-4 shrink-0 bg-[#F7F5F0]">
               {(selectedOrder.status === "PENDING" || selectedOrder.status === "CONFIRMED") ? (
                 <button
                   type="button"
-                  onClick={() => handleOpenCancelModal(selectedOrder)}
-                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold px-4 py-2.5 rounded-xl transition border border-rose-200 cursor-pointer"
+                  onClick={() => {
+                    const orderToCancelTarget = selectedOrder;
+                    setSelectedOrder(null);
+                    handleOpenCancelModal(orderToCancelTarget);
+                  }}
+                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold px-4 py-2.5 rounded-xl transition border border-rose-200 cursor-pointer shadow-xs"
                 >
                   Cancel This Order
                 </button>

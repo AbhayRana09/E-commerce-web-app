@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { PasswordToggleButton } from "@/components/ui/EyeIcons";
 import { useToast } from "@/context/ToastContext";
 import { validatePassword, validateConfirmPassword } from "@/lib/validation";
@@ -33,7 +32,6 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const handleClose = () => {
     setFormData({
@@ -49,7 +47,6 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
     setShowOldPassword(false);
     setShowNewPassword(false);
     setShowConfirmPassword(false);
-    setShowConfirmModal(false);
     onOpenChange(false);
   };
 
@@ -84,7 +81,7 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     setTouched({
       old_password: true,
@@ -102,12 +99,6 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
       return;
     }
 
-    // Trigger confirmation dialog
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirmedPasswordChange = async () => {
-    setShowConfirmModal(false);
     try {
       setLoading(true);
       await api.post("/api/auth/change-password", {
@@ -280,16 +271,6 @@ export default function ChangePasswordModal({ open, onOpenChange }) {
           </form>
         </DialogContent>
       </Dialog>
-
-      {/* Confirmation Dialog */}
-      <ConfirmDialog
-        open={showConfirmModal}
-        onOpenChange={setShowConfirmModal}
-        title="Confirm Password Change"
-        message="Are you sure you want to change your password? You will need to use your new password next time you log in."
-        actionType="save"
-        onConfirm={handleConfirmedPasswordChange}
-      />
     </>
   );
 }

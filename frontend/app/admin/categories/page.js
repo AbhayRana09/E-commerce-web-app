@@ -21,7 +21,6 @@ export default function AdminCategoriesPage() {
   const [touched, setTouched] = useState({ name: false, description: false });
 
   // Confirmation dialogs
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   const loadCategories = useCallback(async () => {
@@ -60,21 +59,22 @@ export default function AdminCategoriesPage() {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (cat) => {
-    setEditingCategory(cat);
-    setFormData({ name: cat.name, description: cat.description || "" });
+  const openEditModal = (category) => {
+    setEditingCategory(category);
+    setFormData({
+      name: category.name || "",
+      description: category.description || "",
+    });
     setTouched({ name: false, description: false });
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = async (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
     setTouched({ name: true, description: true });
 
-    const errName = validateCategoryName(formData.name);
-    const errDesc = validateCategoryDescription(formData.description);
-    if (errName || errDesc) {
-      showToast(errName || errDesc, "error");
+    if (nameError || descError) {
+      showToast("Please fix the errors in the form.", "error");
       return;
     }
 
@@ -89,7 +89,7 @@ export default function AdminCategoriesPage() {
       }
     }
 
-    setShowSaveConfirm(true);
+    executeSave();
   };
 
   const executeSave = async () => {
@@ -108,7 +108,6 @@ export default function AdminCategoriesPage() {
         showToast(`Category "${payload.name}" created successfully!`, "success");
       }
 
-      setShowSaveConfirm(false);
       setIsModalOpen(false);
       loadCategories();
     } catch (err) {
@@ -364,21 +363,7 @@ export default function AdminCategoriesPage() {
         </div>
       )}
 
-      {/* Confirmation Dialog for Create / Save Category Changes */}
-      <ConfirmDialog
-        open={showSaveConfirm}
-        onOpenChange={setShowSaveConfirm}
-        title={editingCategory ? "Save Category Changes?" : "Create New Category?"}
-        message={
-          editingCategory
-            ? `Are you sure you want to update category "${formData.name.trim()}"? These modifications will reflect immediately across your store catalog.`
-            : `Are you sure you want to create category "${formData.name.trim()}"? It will become available immediately for catalog organization.`
-        }
-        actionType="save"
-        onConfirm={executeSave}
-      />
-
-      {/* Confirmation Dialog for Delete Category */}
+      {/* Confirmation Dialog for Delete Category (Direct Page-Level) */}
       <ConfirmDialog
         open={!!categoryToDelete}
         onOpenChange={(open) => {

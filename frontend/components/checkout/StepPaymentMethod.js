@@ -1,23 +1,32 @@
 "use client";
 
-import { formatCurrency } from "@/lib/formatters";
+import { ArrowLeft } from "lucide-react";
 
 export default function StepPaymentMethod({
   paymentMethod,
   setPaymentMethod,
   paymentError,
-  finalTotal,
-  processingOrder,
-  onPlaceOrder,
   onBack,
 }) {
   return (
     <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
-      <div className="pb-5 border-b border-[#DDD6C8]">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-[#2C2A29]">Select Payment Method</h2>
-        <p className="text-xs sm:text-sm text-stone-600 mt-1">
-          Choose your preferred payment method and complete your order securely.
-        </p>
+      <div className="pb-5 border-b border-[#DDD6C8] flex items-center gap-3">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="w-10 h-10 rounded-2xl bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border border-[#D8D4CE] flex items-center justify-center transition shadow-xs cursor-pointer shrink-0"
+            title="Back to Order Summary"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        )}
+        <div>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#2C2A29]">Select Payment Method</h2>
+          <p className="text-xs sm:text-sm text-stone-600 mt-1">
+            Choose your preferred payment method and complete your order securely.
+          </p>
+        </div>
       </div>
 
       {/* Error Notice if payment failed */}
@@ -145,56 +154,6 @@ export default function StepPaymentMethod({
             <span className="text-xl">💵</span>
           </div>
         </div>
-      </div>
-
-      {/* Action Controls */}
-      <div className="bg-[#FFFFFF] border border-[#D8D4CE] rounded-3xl p-6 space-y-4 shadow-xs">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-bold text-stone-800">Amount Payable</span>
-          <span className="text-2xl font-extrabold text-[#2C2A29] font-mono">
-            {formatCurrency(finalTotal)}
-          </span>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center gap-3.5 pt-2">
-          <button
-            type="button"
-            disabled={processingOrder}
-            onClick={() => onPlaceOrder(true)}
-            className="w-full sm:flex-1 bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-50 text-white text-sm font-bold py-3.5 px-6 rounded-2xl transition shadow-xs flex items-center justify-center gap-2 cursor-pointer"
-          >
-            {processingOrder ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Processing Order...</span>
-              </>
-            ) : (
-              <span>✓ Complete Order & Pay Now</span>
-            )}
-          </button>
-
-          {paymentMethod !== "COD" && (
-            <button
-              type="button"
-              disabled={processingOrder}
-              onClick={() => onPlaceOrder(false)}
-              className="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold py-3.5 px-4 rounded-2xl transition cursor-pointer"
-              title="Simulate payment decline and retry prompt"
-            >
-              Payment Decline ✕
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between pt-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border border-[#D8D4CE] text-xs sm:text-sm font-semibold px-5 py-3 rounded-xl transition cursor-pointer shadow-xs"
-        >
-          &larr; Back to Order Review
-        </button>
       </div>
     </div>
   );

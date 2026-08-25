@@ -29,8 +29,8 @@ export default function AddressFormModal({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] max-h-[90vh] p-6 sm:p-8 overflow-y-auto bg-[#F7F5F0] border border-[#DDD6C8] shadow-2xl">
-        <DialogHeader className="border-b border-[#DDD6C8] pb-3 mb-4 flex flex-row items-center justify-between text-left">
+      <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] max-h-[90vh] p-0 flex flex-col overflow-hidden bg-[#F7F5F0] border border-[#DDD6C8] shadow-2xl">
+        <DialogHeader className="border-b border-[#DDD6C8] px-6 sm:px-8 py-5 shrink-0 flex flex-row items-center justify-between text-left">
           <div>
             <DialogTitle className="text-lg sm:text-xl font-bold text-[#2C2A29] tracking-tight">
               {editingAddrId ? "Edit Shipping Address" : "Add Shipping Address"}
@@ -48,7 +48,8 @@ export default function AddressFormModal({
           </button>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} noValidate className="space-y-2 text-sm">
+        <form onSubmit={onSubmit} noValidate className="flex flex-col flex-1 min-h-0 overflow-hidden text-sm">
+          <div className="overflow-y-auto flex-1 px-6 sm:px-8 py-6 space-y-4">
           {/* Street Address */}
           <div>
             <div className="flex items-center justify-between mb-1">
@@ -269,26 +270,27 @@ export default function AddressFormModal({
             </div>
           </div>
 
-          {/* Set Default Checkbox */}
-          <div className="flex items-center gap-2 pt-0.5">
-            <input
-              type="checkbox"
-              id="is_default"
-              checked={newAddr.is_default}
-              onChange={(e) => setNewAddr({ ...newAddr, is_default: e.target.checked })}
-              className="w-4 h-4 rounded bg-[#FFFFFF] border-[#D8D4CE] text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
-            />
-            <label htmlFor="is_default" className="text-stone-700 text-xs cursor-pointer select-none">
-              Set as default shipping address
-            </label>
+            {/* Set Default Checkbox */}
+            <div className="flex items-center gap-2 pt-0.5">
+              <input
+                type="checkbox"
+                id="is_default"
+                checked={newAddr.is_default}
+                onChange={(e) => setNewAddr({ ...newAddr, is_default: e.target.checked })}
+                className="w-4 h-4 rounded bg-[#FFFFFF] border-[#D8D4CE] text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
+              />
+              <label htmlFor="is_default" className="text-stone-700 text-xs cursor-pointer select-none">
+                Set as default shipping address
+              </label>
+            </div>
           </div>
 
           {/* Submit / Cancel Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#DDD6C8] mt-2">
+          <div className="flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-[#DDD6C8] shrink-0 bg-[#F7F5F0]">
             <button
               type="button"
               onClick={onCancel}
-              className="text-stone-600 hover:text-[#2C2A29] text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer"
+              className="text-stone-600 hover:text-[#2C2A29] text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer hover:bg-[#ECE8DF]"
             >
               Cancel
             </button>

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getOrderById } from "@/lib/orders";
 import RouteGuard from "@/components/RouteGuard";
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const orderId = searchParams.get("orderId");
 
   const [order, setOrder] = useState(null);
@@ -35,6 +36,17 @@ function ConfirmationContent() {
 
     fetchReceipt();
   }, [orderId]);
+
+  // 5-second auto-redirect to /orders
+  useEffect(() => {
+    if (!order) return;
+
+    const timer = setTimeout(() => {
+      router.push("/orders");
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [order, router]);
 
   if (loading) {
     return (
@@ -65,6 +77,9 @@ function ConfirmationContent() {
     );
   }
 
+  const isCOD = String(order.payment_method || "").toUpperCase().includes("COD");
+  const isPaid = String(order.payment_status || "").toUpperCase() === "PAID" && !isCOD;
+
   return (
     <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 py-8">
       {/* Top Success Banner */}
@@ -73,9 +88,15 @@ function ConfirmationContent() {
           ✓
         </div>
         <div>
-          <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200 inline-block mb-3">
-            Order Confirmed & Paid
-          </span>
+          {isPaid ? (
+            <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200 inline-block mb-3">
+              Order Confirmed & Paid
+            </span>
+          ) : (
+            <span className="text-xs font-bold text-amber-800 tracking-wider uppercase bg-amber-50 px-3.5 py-1.5 rounded-full border border-amber-200 inline-block mb-3">
+              Order Confirmed (Payment Pending)
+            </span>
+          )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2C2A29] tracking-tight">
             Thank you for your purchase!
           </h1>
@@ -92,7 +113,10 @@ function ConfirmationContent() {
             Placed on: {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </span>
           <span className="bg-[#FFFFFF] border border-[#D8D4CE] px-4 py-2 rounded-xl shadow-xs">
-            Payment: <strong className="text-amber-800 font-bold">{order.payment_method === "MOCK_CARD" ? "Card" : order.payment_method === "MOCK_UPI" ? "UPI" : order.payment_method || "Card"}</strong>
+            Payment Method: <strong className="text-[#2C2A29] font-bold">{isCOD ? "Cash on Delivery (COD)" : order.payment_method === "MOCK_CARD" ? "Card" : order.payment_method === "MOCK_UPI" ? "UPI" : order.payment_method || "Card"}</strong>
+          </span>
+          <span className="bg-[#FFFFFF] border border-[#D8D4CE] px-4 py-2 rounded-xl shadow-xs">
+            Payment Status: <strong className={`font-bold ${isPaid ? "text-emerald-700" : "text-amber-800"}`}>{isPaid ? "Paid" : "Pending"}</strong>
           </span>
         </div>
       </div>
@@ -190,7 +214,9 @@ function ConfirmationContent() {
             )}
 
             <div className="pt-4 border-t border-[#DDD6C8] flex items-center justify-between text-base">
-              <span className="font-bold text-[#2C2A29]">Total Paid</span>
+              <span className="font-bold text-[#2C2A29]">
+                {order.payment_status === "PAID" ? "Total Paid" : "Total Amount Payable"}
+              </span>
               <span className="text-2xl font-extrabold text-[#2C2A29] font-mono">
                 ${order.total_amount.toFixed(2)}
               </span>

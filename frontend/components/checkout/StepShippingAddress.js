@@ -20,16 +20,27 @@ export default function StepShippingAddress({
           <p className="text-xs sm:text-sm text-stone-600 mt-1">
             Choose an existing delivery destination or add a new verified address.
           </p>
+          <div className="mt-3.5">
+            <button
+              type="button"
+              onClick={onOpenAddModal}
+              className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#1E3A5F] border border-[#D8D4CE] text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer w-fit"
+            >
+              <span className="text-base font-bold leading-none">+</span>
+              <span>Add New Address</span>
+            </button>
+          </div>
         </div>
+
+        {/* Fitted Continue Button in Header (replacing previous Add Address position) */}
         <button
           type="button"
-          onClick={onOpenAddModal}
-          className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer self-start sm:self-auto"
+          onClick={onContinue}
+          disabled={!selectedAddressId}
+          className="bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-40 text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-2xl transition shadow-xs flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed shrink-0 self-start sm:self-center"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Add New Address</span>
+          <span>Continue to Order Summary</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 
@@ -50,18 +61,17 @@ export default function StepShippingAddress({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {addresses.map((addr) => {
             const isSelected = selectedAddressId === addr.id;
             return (
               <div
                 key={addr.id}
                 onClick={() => onSelectAddress(addr.id)}
-                className={`p-5 rounded-3xl border transition cursor-pointer relative flex flex-col justify-between min-w-0 overflow-hidden ${
-                  isSelected
+                className={`p-5 rounded-3xl border transition cursor-pointer relative flex flex-col justify-between min-w-0 overflow-hidden ${isSelected
                     ? "bg-[#FFFFFF] border-[#1E3A5F] shadow-xs ring-1 ring-[#1E3A5F]"
                     : "bg-[#FFFFFF] border-[#D8D4CE] hover:border-stone-400"
-                }`}
+                  }`}
               >
                 <div className="space-y-2 min-w-0">
                   <div className="flex items-center justify-between gap-2">
@@ -111,18 +121,6 @@ export default function StepShippingAddress({
           })}
         </div>
       )}
-
-      <div className="flex justify-end pt-5 border-t border-[#DDD6C8]">
-        <button
-          type="button"
-          onClick={onContinue}
-          disabled={!selectedAddressId}
-          className="bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-40 text-white text-xs sm:text-sm font-semibold px-7 py-3.5 rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
-        >
-          <span>Continue to Order Review</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
     </div>
   );
 }

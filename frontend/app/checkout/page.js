@@ -11,8 +11,9 @@ import RouteGuard from "@/components/RouteGuard";
 import { getAddresses, createAddress, updateAddress } from "@/lib/address";
 import { validateCoupon, getActiveOffers } from "@/lib/coupons";
 import { createOrder, simulateOrderPayment } from "@/lib/orders";
+import { ArrowRight } from "lucide-react";
 import AddressFormModal from "@/components/profile/AddressFormModal";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import CheckoutCouponModal from "@/components/checkout/CheckoutCouponModal";
 import CheckoutStepper from "@/components/checkout/CheckoutStepper";
 import StepShippingAddress from "@/components/checkout/StepShippingAddress";
 import StepReviewCart from "@/components/checkout/StepReviewCart";
@@ -54,9 +55,9 @@ function CheckoutContent() {
     postal_code: false,
   });
   const [savingAddress, setSavingAddress] = useState(false);
-  const [showAddressSaveConfirm, setShowAddressSaveConfirm] = useState(false);
 
   // Coupon & Available Offers State
+  const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
@@ -249,11 +250,7 @@ function CheckoutContent() {
       return;
     }
 
-    if (editingAddrId) {
-      setShowAddressSaveConfirm(true);
-    } else {
-      await executeSaveAddress();
-    }
+    await executeSaveAddress();
   };
 
   const executeSaveAddress = async () => {
@@ -267,7 +264,6 @@ function CheckoutContent() {
         showToast("Shipping address saved successfully!", "success");
         setSelectedAddressId(created.id);
       }
-      setShowAddressSaveConfirm(false);
       setIsAddressModalOpen(false);
       await loadAddresses();
     } catch (err) {
@@ -279,7 +275,7 @@ function CheckoutContent() {
 
   // Handle Apply Coupon (Manual Form Input)
   const handleApplyCoupon = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!couponCodeInput.trim()) {
       showToast("Please enter a coupon code", "error");
       return;
@@ -423,70 +419,94 @@ function CheckoutContent() {
         canNavigateToStep={() => Boolean(selectedAddressId)}
       />
 
-      {/* Main Grid: Left Wizard Stage + Right Sticky Summary Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left 2 Cols: Active Wizard Step */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* STEP 1: ADDRESS SELECTION */}
-          {currentStep === 1 && (
-            <StepShippingAddress
-              addresses={addresses}
-              selectedAddressId={selectedAddressId}
-              onSelectAddress={setSelectedAddressId}
-              loadingAddresses={loadingAddresses}
-              onOpenAddModal={handleOpenAddModal}
-              onOpenEditModal={handleOpenEditModal}
-              user={user}
-              onContinue={() => setCurrentStep(2)}
-            />
-          )}
+      {/* STEP 1: ADDRESS SELECTION (Wide Fit to Screen) */}
+      {currentStep === 1 && (
+        <div className="w-full space-y-6">
+          <StepShippingAddress
+            addresses={addresses}
+            selectedAddressId={selectedAddressId}
+            onSelectAddress={setSelectedAddressId}
+            loadingAddresses={loadingAddresses}
+            onOpenAddModal={handleOpenAddModal}
+            onOpenEditModal={handleOpenEditModal}
+            user={user}
+            onContinue={() => setCurrentStep(2)}
+          />
+        </div>
+      )}
 
-          {/* STEP 2: REVIEW & OFFERS */}
-          {currentStep === 2 && (
-            <StepReviewCart
-              selectedAddress={selectedAddress}
-              items={activeItems}
-              appliedCoupon={appliedCoupon}
-              couponCodeInput={couponCodeInput}
-              setCouponCodeInput={setCouponCodeInput}
-              validatingCoupon={validatingCoupon}
-              handleApplyCoupon={handleApplyCoupon}
-              handleRemoveCoupon={handleRemoveCoupon}
-              availableOffers={availableOffers}
-              loadingOffers={loadingOffers}
-              subtotal={activeSubtotal}
-              handleApplyOfferCode={handleApplyOfferCode}
-              applyingOfferCode={applyingOfferCode}
-              onBack={() => setCurrentStep(1)}
-              onProceedToPayment={() => setCurrentStep(3)}
-            />
-          )}
+      {/* STEP 2: ORDER SUMMARY (Wide Fit to Screen) */}
+      {currentStep === 2 && (
+        <div className="w-full space-y-6">
+          <StepReviewCart
+            items={activeItems}
+            onBack={() => setCurrentStep(1)}
+            onContinue={() => setCurrentStep(3)}
+          />
+        </div>
+      )}
 
-          {/* STEP 3: PAYMENT */}
-          {currentStep === 3 && (
+      {/* STEP 3: PAYMENT & PRICE DETAILS (2-Column Unified View) */}
+      {currentStep === 3 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Left 2 Cols: Payment Methods */}
+          <div className="lg:col-span-2 space-y-6">
             <StepPaymentMethod
               paymentMethod={paymentMethod}
               setPaymentMethod={setPaymentMethod}
               paymentError={paymentError}
-              finalTotal={finalTotal}
-              processingOrder={processingOrder}
-              onPlaceOrder={handlePlaceOrder}
               onBack={() => setCurrentStep(2)}
             />
-          )}
-        </div>
+          </div>
 
-        {/* Right 1 Col: Fixed Summary Breakdown */}
-        <CheckoutSummaryCard
-          itemsCount={activeItems.length}
-          subtotal={activeSubtotal}
-          shippingCost={shippingCost}
-          discountAmount={discountAmount}
-          appliedCoupon={appliedCoupon}
-          estimatedTax={estimatedTax}
-          finalTotal={finalTotal}
-        />
-      </div>
+          {/* Right 1 Col: Price Details & Complete Order Button */}
+          <CheckoutSummaryCard
+            itemsCount={activeItems.length}
+            subtotal={activeSubtotal}
+            shippingCost={shippingCost}
+            discountAmount={discountAmount}
+            appliedCoupon={appliedCoupon}
+            estimatedTax={estimatedTax}
+            finalTotal={finalTotal}
+            onOpenCouponModal={() => setIsCouponModalOpen(true)}
+          >
+            <div className="pt-1">
+              <button
+                type="button"
+                disabled={processingOrder}
+                onClick={() => handlePlaceOrder(true)}
+                className="w-full bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-50 text-white text-sm font-bold py-3.5 px-6 rounded-2xl transition shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {processingOrder ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Processing Order...</span>
+                  </>
+                ) : (
+                  <span>✓ Complete Order & Pay Now</span>
+                )}
+              </button>
+            </div>
+          </CheckoutSummaryCard>
+        </div>
+      )}
+
+      {/* Flipkart-Style Coupon & Offers Modal */}
+      <CheckoutCouponModal
+        open={isCouponModalOpen}
+        onClose={() => setIsCouponModalOpen(false)}
+        couponCodeInput={couponCodeInput}
+        setCouponCodeInput={setCouponCodeInput}
+        validatingCoupon={validatingCoupon}
+        handleApplyCoupon={handleApplyCoupon}
+        appliedCoupon={appliedCoupon}
+        handleRemoveCoupon={handleRemoveCoupon}
+        availableOffers={availableOffers}
+        loadingOffers={loadingOffers}
+        subtotal={activeSubtotal}
+        handleApplyOfferCode={handleApplyOfferCode}
+        applyingOfferCode={applyingOfferCode}
+      />
 
       {/* Address Form Modal */}
       <AddressFormModal
@@ -507,16 +527,6 @@ function CheckoutContent() {
         availableCities={availableCities}
         onSubmit={handleSaveAddress}
         onCancel={() => setIsAddressModalOpen(false)}
-      />
-
-      {/* Address Edit Confirmation Dialog */}
-      <ConfirmDialog
-        open={showAddressSaveConfirm}
-        onOpenChange={setShowAddressSaveConfirm}
-        title="Save Address Changes"
-        message="Are you sure you want to save the updated shipping address details?"
-        actionType="save"
-        onConfirm={executeSaveAddress}
       />
     </div>
   );
