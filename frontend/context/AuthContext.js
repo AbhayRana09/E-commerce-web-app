@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
           const userData = await api.get("/api/auth/me");
           setUser(userData);
         } catch (err) {
-          console.error("Failed to load user session:", err);
+          console.warn("Session expired or invalid, clearing credentials.");
           localStorage.removeItem("token");
           setUser(null);
         }

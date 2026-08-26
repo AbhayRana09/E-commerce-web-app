@@ -18,6 +18,7 @@ import {
 import ProductFilters from "@/components/admin/products/ProductFilters";
 import ProductTable from "@/components/admin/products/ProductTable";
 import ProductFormModal from "@/components/admin/products/ProductFormModal";
+import ProductReviewsModal from "@/components/admin/products/ProductReviewsModal";
 
 export default function AdminProductsPage() {
   const { showToast } = useToast();
@@ -35,6 +36,7 @@ export default function AdminProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [selectedProductForReviews, setSelectedProductForReviews] = useState(null);
 
   // Image upload mode: 'file' | 'url'
   const [imageInputMode, setImageInputMode] = useState("file");
@@ -302,7 +304,16 @@ export default function AdminProductsPage() {
         onEditProduct={handleOpenEditModal}
         onDelete={(p) => setProductToDelete(p)}
         onDeleteProduct={(p) => setProductToDelete(p)}
+        onViewReviews={(p) => setSelectedProductForReviews(p)}
         onAddFirst={handleOpenAddModal}
+      />
+
+      {/* Product Reviews Moderation Modal */}
+      <ProductReviewsModal
+        isOpen={Boolean(selectedProductForReviews)}
+        onClose={() => setSelectedProductForReviews(null)}
+        product={selectedProductForReviews}
+        onReviewDeleted={loadData}
       />
 
       {/* Create / Edit Modal */}

@@ -35,6 +35,8 @@ class ProductOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     category: Optional[CategoryOut] = None
+    average_rating: Optional[float] = 0.0
+    reviews_count: Optional[int] = 0
 
 class ProductPaginatedOut(BaseModel):
     items: List[ProductOut]

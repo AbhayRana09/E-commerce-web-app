@@ -159,6 +159,8 @@ function NavbarContent() {
                     handleSearchChange(searchInput);
                   }
                 }}
+                suppressHydrationWarning
+                autoComplete="off"
                 className="w-full bg-[#FFFFFF] border border-[#D8D4CE] focus:border-[#1E3A5F] rounded-xl px-4 py-2 pl-10 pr-9 text-xs sm:text-sm text-[#2C2A29] placeholder:text-stone-400 focus:outline-none transition shadow-xs"
               />
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -272,6 +274,7 @@ function NavbarContent() {
                       setDropdownOpen(false);
                       logout();
                       showToast("Logged out successfully!", "success");
+                      router.push("/");
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer text-left"
                   >

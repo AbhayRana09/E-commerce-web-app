@@ -16,6 +16,7 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  Star,
 } from "lucide-react";
 
 function HomeContent() {
@@ -282,6 +283,24 @@ function HomeContent() {
                     <h3 className="font-bold text-[#2C2A29] text-base line-clamp-1 group-hover:text-[#1E3A5F] transition break-words [overflow-wrap:anywhere]">
                       {product.name}
                     </h3>
+
+                    {/* Star Rating Badge */}
+                    {product.reviews_count > 0 ? (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <div className="flex items-center gap-0.5 text-amber-500 font-bold text-[11px]">
+                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <span>{product.average_rating?.toFixed(1) || "0.0"}</span>
+                        </div>
+                        <span className="text-[11px] text-stone-500">
+                          ({product.reviews_count})
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 mt-1 text-[11px] text-stone-400">
+                        <Star className="w-3 h-3 text-stone-300" />
+                        <span>No reviews yet</span>
+                      </div>
+                    )}
 
                     {/* Product Description */}
                     <p className="text-stone-600 text-xs mt-1 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">

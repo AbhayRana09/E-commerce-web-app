@@ -255,7 +255,7 @@ function WishlistContent() {
 
 export default function WishlistPage() {
   return (
-    <RouteGuard>
+    <RouteGuard type="customer" adminRedirect="/admin">
       <WishlistContent />
     </RouteGuard>
   );

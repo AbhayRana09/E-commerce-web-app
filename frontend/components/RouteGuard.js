@@ -19,13 +19,11 @@ export default function RouteGuard({ children, type = "private", adminRedirect =
     if (loading) return;
 
     if (type === "private" && !user) {
-      router.replace("/login");
+      router.replace("/");
     } else if (type === "guest" && user) {
       router.replace(user.role === "ADMIN" ? "/admin" : "/");
     } else if (type === "admin") {
-      if (!user) {
-        router.replace("/login");
-      } else if (user.role !== "ADMIN") {
+      if (!user || user.role !== "ADMIN") {
         router.replace("/");
       }
     } else if (type === "customer") {

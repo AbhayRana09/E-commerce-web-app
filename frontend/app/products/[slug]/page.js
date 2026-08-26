@@ -8,6 +8,7 @@ import { useToast } from "@/context/ToastContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import RouteGuard from "@/components/RouteGuard";
+import ProductReviewsSection from "@/components/reviews/ProductReviewsSection";
 import {
   ShoppingCart,
   Heart,
@@ -16,6 +17,7 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
+  Star,
 } from "lucide-react";
 
 function ProductDetailContent() {
@@ -179,6 +181,28 @@ function ProductDetailContent() {
                 {product.name}
               </h1>
 
+              {/* Rating Summary Line */}
+              {product.reviews_count > 0 ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <span>{product.average_rating?.toFixed(1) || "0.0"}</span>
+                  </div>
+                  <span className="text-stone-300">•</span>
+                  <a
+                    href="#reviews-section"
+                    className="text-xs font-semibold text-[#1E3A5F] hover:underline"
+                  >
+                    {product.reviews_count} {product.reviews_count === 1 ? "Customer Review" : "Customer Reviews"}
+                  </a>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                  <Star className="w-3.5 h-3.5 text-stone-300" />
+                  <span>No reviews yet</span>
+                </div>
+              )}
+
               {/* Price Tag */}
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-bold text-[#2C2A29] font-mono">${product.price.toFixed(2)}</span>
@@ -298,6 +322,11 @@ function ProductDetailContent() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Customer Reviews & Ratings Hub */}
+        <div id="reviews-section" className="pt-4">
+          <ProductReviewsSection productId={product.id} productName={product.name} />
         </div>
       </div>
     </div>

@@ -26,6 +26,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("token");
+    }
+
     let message = "Something went wrong";
     const detail = error.response?.data?.detail;
 

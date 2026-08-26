@@ -1,6 +1,6 @@
 from math import ceil
 from typing import Optional, Any, cast, List
-from datetime import datetime, timezone
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Body
 
 from app.database import db
@@ -27,8 +27,8 @@ router = APIRouter(prefix="/api/orders", tags=["Orders"])
 async def get_admin_dashboard_stats(current_admin=Depends(require_admin)):
     """Fetch comprehensive metrics and aggregation analytics for Admin Dashboard."""
     total_products = await db.product.count()
-    active_products = await db.product.count(where={"is_active": True})
-    out_of_stock = await db.product.count(where={"stock_quantity": 0})
+    active_products = await db.product.count(where=cast(Any, {"is_active": True}))
+    out_of_stock = await db.product.count(where=cast(Any, {"stock_quantity": 0}))
     total_categories = await db.category.count()
     total_customers = await db.user.count(where=cast(Any, {"role": "CUSTOMER"}))
     total_orders = await db.order.count()
@@ -39,9 +39,9 @@ async def get_admin_dashboard_stats(current_admin=Depends(require_admin)):
     total_sales = sum(o.total_amount for o in orders_for_sales) if orders_for_sales else 0.0
 
     recent_raw_orders = await db.order.find_many(
-        order={"created_at": "desc"},
+        order=cast(Any, {"created_at": "desc"}),
         take=6,
-        include={"user": True, "items": True}
+        include=cast(Any, {"user": True, "items": True})
     )
 
     recent_orders = [
@@ -102,13 +102,13 @@ async def list_all_orders_admin(
 
     orders = await db.order.find_many(
         where=cast(Any, where),
-        include={
+        include=cast(Any, {
             "user": True,
             "address": True,
             "coupon": True,
             "items": {"include": {"product": True}}
-        },
-        order={"created_at": "desc"},
+        }),
+        order=cast(Any, {"created_at": "desc"}),
         skip=skip,
         take=limit
     )
@@ -132,12 +132,12 @@ async def get_order_detail_admin(
     """Fetch single order full details for admin."""
     order = await db.order.find_unique(
         where={"id": order_id},
-        include={
+        include=cast(Any, {
             "user": True,
             "address": True,
             "coupon": True,
             "items": {"include": {"product": True}}
-        }
+        })
     )
     if not order:
         raise HTTPException(
@@ -163,12 +163,12 @@ async def update_order_status_admin(
     updated_order = await db.order.update(
         where={"id": order_id},
         data=cast(Any, {"status": status_in.status.value}),
-        include={
+        include=cast(Any, {
             "user": True,
             "address": True,
             "coupon": True,
             "items": {"include": {"product": True}}
-        }
+        })
     )
     return updated_order
 
@@ -185,7 +185,7 @@ async def create_order(
     # 1. Fetch user's cart
     cart = await db.cart.find_unique(
         where={"user_id": current_user.id},
-        include={"items": {"include": {"product": True}}}
+        include=cast(Any, {"items": {"include": {"product": True}}})
     )
     if not cart or not cart.items:
         raise HTTPException(
@@ -195,7 +195,7 @@ async def create_order(
 
     # 2. Verify Shipping Address belongs to user
     address = await db.address.find_first(
-        where={"id": payload.address_id, "user_id": current_user.id}
+        where=cast(Any, {"id": payload.address_id, "user_id": current_user.id})
     )
     if not address:
         raise HTTPException(
@@ -268,25 +268,26 @@ async def create_order(
                         "price_at_purchase": item.product.price
                     }
                     for item in cart.items
+                    if item.product is not None
                 ]
             }
         }),
-        include={
+        include=cast(Any, {
             "user": True,
             "address": True,
             "coupon": True,
             "items": {"include": {"product": True}}
-        }
+        })
     )
 
     # 7. Deduct product stock & clear cart
     for item in cart.items:
         await db.product.update(
             where={"id": item.product_id},
-            data={"stock_quantity": {"decrement": item.quantity}}
+            data=cast(Any, {"stock_quantity": {"decrement": item.quantity}})
         )
 
-    await db.cartitem.delete_many(where={"cart_id": cart.id})
+    await db.cartitem.delete_many(where=cast(Any, {"cart_id": cart.id}))
 
     return order
 
@@ -299,7 +300,7 @@ async def simulate_order_payment(
 ):
     """Simulates payment gateway authorization and capture."""
     order = await db.order.find_first(
-        where={"id": order_id, "user_id": current_user.id}
+        where=cast(Any, {"id": order_id, "user_id": current_user.id})
     )
     if not order:
         raise HTTPException(
@@ -310,7 +311,7 @@ async def simulate_order_payment(
     if not payload.simulate_success:
         await db.order.update(
             where={"id": order_id},
-            data={"payment_status": "FAILED"}
+            data=cast(Any, {"payment_status": "FAILED"})
         )
         return {
             "success": False,
@@ -321,7 +322,7 @@ async def simulate_order_payment(
 
     # Success or COD: Mark order as CONFIRMED, COD payment_status remains PENDING
     payment_status = "PENDING" if payload.payment_method == "COD" else "PAID"
-    updated = await db.order.update(
+    await db.order.update(
         where={"id": order_id},
         data=cast(Any, {
             "status": "CONFIRMED",
@@ -342,14 +343,14 @@ async def simulate_order_payment(
 async def get_my_orders(current_user=Depends(get_current_user)):
     """Fetch order history for authenticated customer."""
     orders = await db.order.find_many(
-        where={"user_id": current_user.id},
-        include={
+        where=cast(Any, {"user_id": current_user.id}),
+        include=cast(Any, {
             "user": True,
             "address": True,
             "coupon": True,
             "items": {"include": {"product": True}}
-        },
-        order={"created_at": "desc"}
+        }),
+        order=cast(Any, {"created_at": "desc"})
     )
     return orders
 
@@ -361,12 +362,12 @@ async def get_single_order(
     """Fetch details for a single order owned by user or viewed by admin."""
     order = await db.order.find_unique(
         where={"id": order_id},
-        include={
+        include=cast(Any, {
             "user": True,
             "address": True,
             "coupon": True,
             "items": {"include": {"product": True}}
-        }
+        })
     )
     if not order:
         raise HTTPException(
@@ -390,8 +391,8 @@ async def cancel_my_order(
 ):
     """Allows customer to cancel a pending order and restore stock."""
     order = await db.order.find_first(
-        where={"id": order_id, "user_id": current_user.id},
-        include={"items": True}
+        where=cast(Any, {"id": order_id, "user_id": current_user.id}),
+        include=cast(Any, {"items": True})
     )
     if not order:
         raise HTTPException(
@@ -406,11 +407,12 @@ async def cancel_my_order(
         )
 
     # Restore stock
-    for item in order.items:
-        await db.product.update(
-            where={"id": item.product_id},
-            data={"stock_quantity": {"increment": item.quantity}}
-        )
+    if order.items:
+        for item in order.items:
+            await db.product.update(
+                where={"id": item.product_id},
+                data=cast(Any, {"stock_quantity": {"increment": item.quantity}})
+            )
 
     reason_str = payload.reason.strip() if payload and payload.reason and payload.reason.strip() else "Cancelled by customer"
 
@@ -420,11 +422,11 @@ async def cancel_my_order(
             "status": "CANCELLED",
             "cancellation_reason": reason_str
         }),
-        include={
+        include=cast(Any, {
             "user": True,
             "address": True,
             "coupon": True,
             "items": {"include": {"product": True}}
-        }
+        })
     )
     return cancelled

@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { getMyOrders, cancelOrder } from "@/lib/orders";
+import { getMyReviews } from "@/lib/reviews";
 import { useToast } from "@/context/ToastContext";
 import RouteGuard from "@/components/RouteGuard";
-import { MoreVertical, FileText, XCircle } from "lucide-react";
+import RateOrderProductModal from "@/components/reviews/RateOrderProductModal";
+import { MoreVertical, FileText, XCircle, Star } from "lucide-react";
 
 function OrdersContent() {
   const { showToast } = useToast();
@@ -17,11 +19,28 @@ function OrdersContent() {
   const [cancelling, setCancelling] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
 
+  // Reviews state for delivered items
+  const [userReviewsMap, setUserReviewsMap] = useState({});
+  const [reviewingProduct, setReviewingProduct] = useState(null);
+
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getMyOrders();
-      setOrders(data || []);
+      const [ordersData, reviewsData] = await Promise.all([
+        getMyOrders(),
+        getMyReviews().catch(() => []),
+      ]);
+      setOrders(ordersData || []);
+
+      const revMap = {};
+      if (Array.isArray(reviewsData)) {
+        reviewsData.forEach((rev) => {
+          if (rev.product_id) {
+            revMap[rev.product_id] = rev;
+          }
+        });
+      }
+      setUserReviewsMap(revMap);
     } catch (err) {
       showToast(err.message || "Failed to load orders history", "error");
     } finally {
@@ -63,10 +82,10 @@ function OrdersContent() {
         setSelectedOrder((prev) =>
           prev
             ? {
-                ...prev,
-                status: "CANCELLED",
-                cancellation_reason: cancelReason.trim() || "Cancelled by customer",
-              }
+              ...prev,
+              status: "CANCELLED",
+              cancellation_reason: cancelReason.trim() || "Cancelled by customer",
+            }
             : null
         );
       }
@@ -213,6 +232,50 @@ function OrdersContent() {
                           <span>View Receipt</span>
                         </button>
 
+                        {/* Review and Rating in 3-Dot Dropdown */}
+                        {order.status === "DELIVERED" && order.items?.length === 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveDropdownId(null);
+                              setReviewingProduct(order.items[0].product);
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition cursor-pointer text-left"
+                          >
+                            <Star className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />
+                            <span>
+                              {userReviewsMap[order.items[0].product?.id]
+                                ? "Edit Review & Rating"
+                                : "Review and Rating"}
+                            </span>
+                          </button>
+                        )}
+
+                        {order.status === "DELIVERED" && order.items?.length > 1 && (
+                          <>
+                            <div className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold text-stone-400 uppercase tracking-wider border-t border-[#DDD6C8] mt-1">
+                              Review and Rating
+                            </div>
+                            {order.items.map((item) => (
+                              <button
+                                key={`dropdown-review-${item.id}`}
+                                type="button"
+                                onClick={() => {
+                                  setActiveDropdownId(null);
+                                  setReviewingProduct(item.product);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium text-stone-700 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition cursor-pointer text-left"
+                              >
+                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                                <span className="truncate">
+                                  {item.product?.name || "Product"}{" "}
+                                  {userReviewsMap[item.product?.id] ? "(Edit)" : ""}
+                                </span>
+                              </button>
+                            ))}
+                          </>
+                        )}
+
                         {(order.status === "PENDING" || order.status === "CONFIRMED") && (
                           <button
                             type="button"
@@ -261,6 +324,16 @@ function OrdersContent() {
                             Qty: <strong className="text-[#2C2A29]">{item.quantity}</strong>
                           </span>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Item Total Price */}
+                    <div className="text-right shrink-0">
+                      <div className="font-mono text-sm sm:text-base font-extrabold text-[#2C2A29]">
+                        ${(item.quantity * item.price_at_purchase).toFixed(2)}
+                      </div>
+                      <div className="text-[11px] text-stone-500 font-mono">
+                        ${Number(item.price_at_purchase).toFixed(2)} / each
                       </div>
                     </div>
                   </div>
@@ -348,10 +421,27 @@ function OrdersContent() {
                 </span>
                 <div className="divide-y divide-[#DDD6C8] bg-[#ECE8DF] rounded-2xl border border-[#DDD6C8] p-4 text-sm shadow-xs">
                   {selectedOrder.items?.map((item) => (
-                    <div key={item.id} className="py-3 flex items-center justify-between gap-4">
-                      <span className="text-[#2C2A29] font-medium truncate">
-                        {item.product?.name} &times; {item.quantity}
-                      </span>
+                    <div key={item.id} className="py-3 flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-[#2C2A29] font-medium truncate">
+                          {item.product?.name} &times; {item.quantity}
+                        </span>
+                        {selectedOrder.status === "DELIVERED" && item.product && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedOrder(null);
+                              setReviewingProduct(item.product);
+                            }}
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-md border border-amber-300 transition cursor-pointer"
+                          >
+                            <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                            <span>
+                              {userReviewsMap[item.product.id] ? "Edit Rating" : "Rate"}
+                            </span>
+                          </button>
+                        )}
+                      </div>
                       <span className="font-mono text-[#2C2A29] font-bold text-sm">
                         ${(item.quantity * item.price_at_purchase).toFixed(2)}
                       </span>
@@ -456,13 +546,12 @@ function OrdersContent() {
                     Reason for Cancellation <span className="text-stone-500 font-normal lowercase">(optional)</span>
                   </label>
                   <span
-                    className={`text-[11px] font-mono ${
-                      cancelReason.length >= 100
-                        ? "text-red-600 font-bold"
-                        : cancelReason.length >= 80
+                    className={`text-[11px] font-mono ${cancelReason.length >= 100
+                      ? "text-red-600 font-bold"
+                      : cancelReason.length >= 80
                         ? "text-amber-600"
                         : "text-stone-400"
-                    }`}
+                      }`}
                   >
                     {cancelReason.length}/100
                   </span>
@@ -510,13 +599,22 @@ function OrdersContent() {
           </div>
         </div>
       )}
+
+      {/* Flipkart-Style Rate & Review Product Modal */}
+      <RateOrderProductModal
+        isOpen={Boolean(reviewingProduct)}
+        onClose={() => setReviewingProduct(null)}
+        product={reviewingProduct}
+        existingReview={reviewingProduct ? userReviewsMap[reviewingProduct.id] : null}
+        onReviewSubmitted={fetchOrders}
+      />
     </div>
   );
 }
 
 export default function OrdersPage() {
   return (
-    <RouteGuard type="customer" adminRedirect="/admin">
+    <RouteGuard type="private">
       <OrdersContent />
     </RouteGuard>
   );

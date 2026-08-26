@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrency } from "@/lib/formatters";
+import { Star, MessageSquare } from "lucide-react";
 
 export default function ProductTable({
   products = [],
@@ -11,6 +12,7 @@ export default function ProductTable({
   onEditProduct,
   onDelete,
   onDeleteProduct,
+  onViewReviews,
   onAddFirst,
 }) {
   const handleToggle = onToggleActive || onToggleStatus;
@@ -52,6 +54,7 @@ export default function ProductTable({
             <th className="px-4 py-3.5">Category</th>
             <th className="px-4 py-3.5">Price</th>
             <th className="px-4 py-3.5">Stock</th>
+            <th className="px-4 py-3.5">Rating & Reviews</th>
             <th className="px-4 py-3.5">Status</th>
             <th className="px-4 py-3.5 text-right">Actions</th>
           </tr>
@@ -117,6 +120,34 @@ export default function ProductTable({
                 >
                   {product.stock_quantity} units
                 </span>
+              </td>
+
+              {/* Rating & Reviews Column */}
+              <td className="px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => onViewReviews && onViewReviews(product)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition cursor-pointer shadow-xs ${
+                    product.reviews_count > 0
+                      ? "bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900"
+                      : "bg-[#FFFFFF] hover:bg-stone-100 border-[#D8D4CE] text-stone-500"
+                  }`}
+                  title="View and moderate reviews for this product"
+                >
+                  <Star
+                    className={`w-3.5 h-3.5 ${
+                      product.reviews_count > 0
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-stone-300"
+                    }`}
+                  />
+                  <span>
+                    {product.reviews_count > 0
+                      ? `${product.average_rating?.toFixed(1) || "0.0"} (${product.reviews_count})`
+                      : "0 reviews"}
+                  </span>
+                  <MessageSquare className="w-3 h-3 text-stone-400 ml-0.5" />
+                </button>
               </td>
 
               {/* Status Toggle */}
