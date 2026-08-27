@@ -315,15 +315,37 @@ function OrdersContent() {
                         )}
                       </div>
 
-                      <div className="min-w-0 space-y-1">
+                      <div className="min-w-0 space-y-1.5">
                         <h4 className="font-bold text-sm sm:text-base text-[#2C2A29] line-clamp-1 break-words">
                           {item.product?.name || "Product Item"}
                         </h4>
-                        <div className="flex items-center gap-2.5 text-xs text-stone-600 font-medium pt-0.5">
+                        <div className="flex items-center gap-2.5 text-xs text-stone-600 font-medium">
                           <span className="bg-[#FFFFFF] px-2.5 py-0.5 rounded-lg border border-[#D8D4CE] shadow-xs">
                             Qty: <strong className="text-[#2C2A29]">{item.quantity}</strong>
                           </span>
                         </div>
+
+                        {/* Rating Display Under Qty */}
+                        {(() => {
+                          const userReview = item.product?.id ? userReviewsMap[item.product.id] : null;
+                          if (userReview) {
+                            return (
+                              <div className="flex items-center gap-0.5 pt-0.5" title={`Rated ${userReview.rating} of 5 stars`}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`w-3.5 h-3.5 ${
+                                      star <= userReview.rating
+                                        ? "fill-amber-400 text-amber-400"
+                                        : "fill-stone-200 text-stone-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
 

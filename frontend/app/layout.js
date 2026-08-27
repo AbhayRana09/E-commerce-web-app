@@ -4,6 +4,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "E-Commerce Store",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
                 <main className="flex-1 w-full max-w-[1700px] mx-auto p-4 sm:p-6 lg:p-8">
                   {children}
                 </main>
+                <Footer />
               </WishlistProvider>
             </CartProvider>
           </AuthProvider>

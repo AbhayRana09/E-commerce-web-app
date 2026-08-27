@@ -38,17 +38,6 @@ function NavbarContent() {
   const isSuperAdmin = user?.role === "ADMIN";
   const isHome = pathname === "/";
 
-  const isAuthRoute =
-    pathname?.startsWith("/login") ||
-    pathname?.startsWith("/register") ||
-    pathname?.startsWith("/forgot-password") ||
-    pathname?.startsWith("/reset-password") ||
-    pathname?.startsWith("/verify-email");
-
-  if (isAuthRoute) {
-    return null;
-  }
-
   const currentSearch = searchParams?.get("search") || "";
   const currentCategory = searchParams?.get("category_id") || "";
   const [searchInput, setSearchInput] = useState(currentSearch);
@@ -403,7 +392,20 @@ export default function Navbar() {
     pathname?.startsWith("/verify-email");
 
   if (isAuthRoute) {
-    return null;
+    return (
+      <nav className="bg-[#F7F5F0]/95 text-[#2C2A29] border-b border-[#DDD6C8] sticky top-0 z-50 backdrop-blur-md shadow-xs">
+        <div className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/" className="text-lg sm:text-xl font-extrabold tracking-tight text-[#2C2A29] hover:text-[#1E3A5F] transition flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white text-xs font-black shadow-xs">
+                E
+              </span>
+              <span>E-Commerce Store</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
   }
 
   return (

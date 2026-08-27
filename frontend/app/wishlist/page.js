@@ -2,29 +2,54 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import RouteGuard from "@/components/RouteGuard";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import {
   Heart,
   ShoppingCart,
-  Trash2,
   ArrowRight,
   X,
 } from "lucide-react";
 
 function WishlistContent() {
+  const { user } = useAuth();
   const { items, totalWishlistItems, loading, removeItem, moveItemToCart, clearAll } = useWishlist();
-  const { addItem } = useCart();
   const { showToast } = useToast();
-  const router = useRouter();
 
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [movingId, setMovingId] = useState(null);
   const [movingAll, setMovingAll] = useState(false);
+
+  if (!user) {
+    return (
+      <div className="py-16 text-center max-w-lg mx-auto space-y-5 bg-[#ECE8DF] p-8 rounded-3xl border border-[#DDD6C8] shadow-xs">
+        <div className="w-14 h-14 rounded-2xl bg-[#FFFFFF] text-[#1E3A5F] flex items-center justify-center mx-auto border border-[#D8D4CE]">
+          <Heart className="w-7 h-7" />
+        </div>
+        <h2 className="text-xl font-bold text-[#2C2A29] tracking-tight">Login to View Your Wishlist</h2>
+        <p className="text-xs text-stone-600 leading-relaxed">
+          Please log in to your account to view your saved items, track availability, and easily move them to your cart.
+        </p>
+        <div className="pt-2 flex items-center justify-center gap-3">
+          <Link
+            href="/login"
+            className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition shadow-xs"
+          >
+            Login
+          </Link>
+          <Link
+            href="/register"
+            className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] text-xs font-semibold px-5 py-2.5 rounded-xl transition border border-[#D8D4CE] shadow-xs"
+          >
+            Create Account
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const handleMoveToCart = async (productId) => {
     setMovingId(productId);

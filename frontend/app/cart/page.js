@@ -7,7 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 import RouteGuard from "@/components/RouteGuard";
 import {
   ShoppingCart,
-  ShoppingBag,
   Trash2,
   Plus,
   Minus,
@@ -47,7 +46,7 @@ function CartContent() {
             href="/login"
             className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition shadow-xs"
           >
-            Sign In
+            Login
           </Link>
           <Link
             href="/register"
@@ -156,11 +155,6 @@ function CartContent() {
                     <p className="text-xs text-stone-600 font-semibold">
                       ${Number(product?.price || 0).toFixed(2)} each
                     </p>
-                    {isAtMaxStock && (
-                      <p className="text-[10px] font-medium text-amber-800">
-                        ⚠️ Out of stock
-                      </p>
-                    )}
                   </div>
                 </div>
 
@@ -183,7 +177,7 @@ function CartContent() {
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={loading || isAtMaxStock}
                       className="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-[#2C2A29] hover:bg-[#ECE8DF] transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                      title={isAtMaxStock ? "Out of stock" : "Increase quantity"}
+                      title={isAtMaxStock ? "Max stock reached" : "Increase quantity"}
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
