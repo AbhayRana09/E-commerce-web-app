@@ -159,101 +159,104 @@ function WishlistContent() {
             return (
               <div
                 key={item.id}
-                className="group bg-[#ECE8DF] border border-[#DDD6C8] hover:border-[#1E3A5F] rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-md shadow-xs"
+                className="group bg-[#ECE8DF] border border-[#DDD6C8] hover:border-[#1E3A5F] rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-md shadow-xs"
               >
-                <div>
-                  {/* Thumbnail */}
-                  <div className="relative aspect-square rounded-xl bg-[#FFFFFF] overflow-hidden mb-3 border border-[#D8D4CE]">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
-                        No Image
-                      </div>
-                    )}
+                {/* Full-bleed Thumbnail */}
+                <div className="relative aspect-square bg-[#FFFFFF] overflow-hidden border-b border-[#DDD6C8]">
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
+                      No Image
+                    </div>
+                  )}
 
-                    {/* Category Pill */}
-                    {product.category?.name && (
-                      <span className="absolute top-2 left-2 z-10 bg-[#FFFFFF]/95 backdrop-blur-md text-[#1E3A5F] text-[10px] font-semibold px-2.5 py-1 rounded-full border border-[#D8D4CE] shadow-xs">
-                        {product.category.name}
-                      </span>
-                    )}
+                  {/* Category Pill */}
+                  {product.category?.name && (
+                    <span className="absolute top-2.5 left-2.5 z-10 bg-[#FFFFFF]/95 backdrop-blur-md text-[#1E3A5F] text-[10px] font-semibold px-2.5 py-1 rounded-full border border-[#D8D4CE] shadow-xs">
+                      {product.category.name}
+                    </span>
+                  )}
 
-                    {/* Remove Quick Button */}
-                    <button
-                      type="button"
-                      onClick={() => removeItem(product.id)}
-                      className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-[#FFFFFF]/95 hover:bg-rose-50 text-stone-500 hover:text-rose-600 border border-[#D8D4CE] flex items-center justify-center transition cursor-pointer shadow-xs"
-                      title="Remove from wishlist"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-
-                    {/* Stock Status Badge */}
-                    {!isAvailable ? (
-                      <span className="absolute bottom-2 left-2 z-10 bg-rose-50/95 backdrop-blur-md text-rose-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200 shadow-xs flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                        <span>Out of Stock</span>
-                      </span>
-                    ) : stock <= 5 ? (
-                      <span className="absolute bottom-2 left-2 z-10 bg-amber-50/95 backdrop-blur-md text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-200 shadow-xs flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                        <span>Low in Stock ({stock})</span>
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {/* Title */}
-                  <Link
-                    href={`/products/${product.slug}`}
-                    className="font-bold text-[#2C2A29] text-base line-clamp-1 hover:text-[#1E3A5F] transition break-words [overflow-wrap:anywhere]"
+                  {/* Remove Quick Button */}
+                  <button
+                    type="button"
+                    onClick={() => removeItem(product.id)}
+                    className="absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full bg-[#FFFFFF]/95 hover:bg-rose-50 text-stone-500 hover:text-rose-600 border border-[#D8D4CE] flex items-center justify-center transition cursor-pointer shadow-xs"
+                    title="Remove from wishlist"
                   >
-                    {product.name}
-                  </Link>
+                    <X className="w-4 h-4" />
+                  </button>
 
-                  {/* Description */}
-                  <p className="text-stone-600 text-xs mt-1 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
-                    {product.description}
-                  </p>
+                  {/* Stock Status Badge */}
+                  {!isAvailable ? (
+                    <span className="absolute bottom-2.5 right-2.5 z-10 bg-rose-50/95 backdrop-blur-md text-rose-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200 shadow-xs flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                      <span>Out of Stock</span>
+                    </span>
+                  ) : stock <= 5 ? (
+                    <span className="absolute bottom-2.5 right-2.5 z-10 bg-amber-50/95 backdrop-blur-md text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-200 shadow-xs flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                      <span>Low in Stock ({stock})</span>
+                    </span>
+                  ) : null}
                 </div>
 
-                {/* Price & Move to Cart Button */}
-                <div className="mt-4 pt-3 border-t border-[#DDD6C8] space-y-3">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xs text-stone-500">Price</span>
-                    <span className="text-lg font-bold text-[#2C2A29] font-mono">
-                      ${product.price.toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleMoveToCart(product.id)}
-                      disabled={!isAvailable || isMoving}
-                      className="flex-1 bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-40 disabled:hover:bg-[#1E3A5F] text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
-                    >
-                      <ShoppingCart className="w-3.5 h-3.5" />
-                      <span>
-                        {isMoving
-                          ? "Moving..."
-                          : !isAvailable
-                          ? "Out of Stock"
-                          : "Move to Cart"}
-                      </span>
-                    </button>
-
+                {/* Card Content & Details */}
+                <div className="p-4 flex flex-col flex-1 justify-between gap-4">
+                  <div>
+                    {/* Title */}
                     <Link
                       href={`/products/${product.slug}`}
-                      className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] text-xs font-semibold py-2.5 px-3 rounded-xl border border-[#D8D4CE] transition shadow-xs"
-                      title="View Details"
+                      className="font-bold text-[#2C2A29] text-base line-clamp-1 hover:text-[#1E3A5F] transition break-words [overflow-wrap:anywhere]"
                     >
-                      View
+                      {product.name}
                     </Link>
+
+                    {/* Description */}
+                    <p className="text-stone-600 text-xs mt-1.5 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
+                      {product.description}
+                    </p>
+                  </div>
+
+                  {/* Price & Move to Cart Button */}
+                  <div className="pt-3 border-t border-[#DDD6C8] space-y-3">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xs text-stone-500">Price</span>
+                      <span className="text-lg font-bold text-[#2C2A29] font-mono">
+                        ${product.price.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveToCart(product.id)}
+                        disabled={!isAvailable || isMoving}
+                        className="flex-1 bg-[#1E3A5F] hover:bg-[#152843] disabled:opacity-40 disabled:hover:bg-[#1E3A5F] text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <span>
+                          {isMoving
+                            ? "Moving..."
+                            : !isAvailable
+                            ? "Out of Stock"
+                            : "Move to Cart"}
+                        </span>
+                      </button>
+
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] text-xs font-semibold py-2.5 px-3 rounded-xl border border-[#D8D4CE] transition shadow-xs"
+                        title="View Details"
+                      >
+                        View
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

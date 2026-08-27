@@ -218,130 +218,133 @@ function HomeContent() {
               return (
                 <div
                   key={product.id}
-                  className="group bg-[#ECE8DF] border border-[#DDD6C8] hover:border-[#1E3A5F] rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:-translate-y-1 shadow-xs"
+                  className="group bg-[#ECE8DF] border border-[#DDD6C8] hover:border-[#1E3A5F] rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:-translate-y-1 shadow-xs"
                 >
-                  <div>
-                    {/* Product Image */}
-                    <div className="relative aspect-square rounded-xl bg-[#FFFFFF] overflow-hidden mb-3 border border-[#D8D4CE]">
-                      {product.image_url ? (
-                        <img
-                          src={product.image_url}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
-                          No Image
-                        </div>
-                      )}
-
-                      {/* Category Badge */}
-                      {product.category?.name && (
-                        <span className="absolute top-2 left-2 z-10 bg-[#FFFFFF]/95 backdrop-blur-md text-[#1E3A5F] text-[10px] font-semibold px-2.5 py-1 rounded-full border border-[#D8D4CE] shadow-xs">
-                          {product.category.name}
-                        </span>
-                      )}
-
-                      {/* Wishlist Heart Toggle Button (Top-Right) */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleWishlist(product);
-                        }}
-                        className={`absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center transition shadow-xs cursor-pointer ${
-                          isInWishlist(product.id)
-                            ? "bg-rose-500 text-white hover:bg-rose-600 scale-105"
-                            : "bg-[#FFFFFF]/90 hover:bg-[#FFFFFF] text-stone-600 hover:text-rose-500 border border-[#D8D4CE]"
-                        }`}
-                        title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
-                        aria-label="Toggle Wishlist"
-                      >
-                        <Heart
-                          className={`w-4 h-4 transition-transform active:scale-125 ${
-                            isInWishlist(product.id) ? "fill-current" : ""
-                          }`}
-                        />
-                      </button>
-
-                      {/* Stock Badge */}
-                      {!isAvailable ? (
-                        <span className="absolute bottom-2 right-2 z-10 bg-rose-50/95 backdrop-blur-md text-rose-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200 shadow-xs flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                          <span>Out of Stock</span>
-                        </span>
-                      ) : stock <= 5 ? (
-                        <span className="absolute bottom-2 right-2 z-10 bg-amber-50/95 backdrop-blur-md text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-200 shadow-xs flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                          <span>Low in Stock</span>
-                        </span>
-                      ) : null}
-                    </div>
-
-                    {/* Product Name */}
-                    <h3 className="font-bold text-[#2C2A29] text-base line-clamp-1 group-hover:text-[#1E3A5F] transition break-words [overflow-wrap:anywhere]">
-                      {product.name}
-                    </h3>
-
-                    {/* Star Rating Badge */}
-                    {product.reviews_count > 0 ? (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <div className="flex items-center gap-0.5 text-amber-500 font-bold text-[11px]">
-                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                          <span>{product.average_rating?.toFixed(1) || "0.0"}</span>
-                        </div>
-                        <span className="text-[11px] text-stone-500">
-                          ({product.reviews_count})
-                        </span>
-                      </div>
+                  {/* Full-bleed Product Image */}
+                  <div className="relative aspect-square bg-[#FFFFFF] overflow-hidden border-b border-[#DDD6C8]">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     ) : (
-                      <div className="flex items-center gap-1 mt-1 text-[11px] text-stone-400">
-                        <Star className="w-3 h-3 text-stone-300" />
-                        <span>No reviews yet</span>
+                      <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
+                        No Image
                       </div>
                     )}
 
-                    {/* Product Description */}
-                    <p className="text-stone-600 text-xs mt-1 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
-                      {product.description}
-                    </p>
+                    {/* Category Badge */}
+                    {product.category?.name && (
+                      <span className="absolute top-2.5 left-2.5 z-10 bg-[#FFFFFF]/95 backdrop-blur-md text-[#1E3A5F] text-[10px] font-semibold px-2.5 py-1 rounded-full border border-[#D8D4CE] shadow-xs">
+                        {product.category.name}
+                      </span>
+                    )}
+
+                    {/* Wishlist Heart Toggle Button (Top-Right) */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(product);
+                      }}
+                      className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full flex items-center justify-center transition shadow-xs cursor-pointer ${
+                        isInWishlist(product.id)
+                          ? "bg-rose-500 text-white hover:bg-rose-600 scale-105"
+                          : "bg-[#FFFFFF]/90 hover:bg-[#FFFFFF] text-stone-600 hover:text-rose-500 border border-[#D8D4CE]"
+                      }`}
+                      title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                      aria-label="Toggle Wishlist"
+                    >
+                      <Heart
+                        className={`w-4 h-4 transition-transform active:scale-125 ${
+                          isInWishlist(product.id) ? "fill-current" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Stock Badge */}
+                    {!isAvailable ? (
+                      <span className="absolute bottom-2.5 right-2.5 z-10 bg-rose-50/95 backdrop-blur-md text-rose-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200 shadow-xs flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        <span>Out of Stock</span>
+                      </span>
+                    ) : stock <= 5 ? (
+                      <span className="absolute bottom-2.5 right-2.5 z-10 bg-amber-50/95 backdrop-blur-md text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-200 shadow-xs flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Low in Stock</span>
+                      </span>
+                    ) : null}
                   </div>
 
-                  {/* Footer / Price & Actions */}
-                  <div className="mt-4 pt-3 border-t border-[#DDD6C8] flex items-center justify-between gap-2">
+                  {/* Card Content & Details */}
+                  <div className="p-4 flex flex-col flex-1 justify-between gap-4">
                     <div>
-                      <span className="text-[10px] text-stone-500 block uppercase font-medium">Price</span>
-                      <span className="text-base font-bold text-[#2C2A29] font-mono">
-                        ${product.price.toFixed(2)}
-                      </span>
+                      {/* Product Name */}
+                      <h3 className="font-bold text-[#2C2A29] text-base line-clamp-1 group-hover:text-[#1E3A5F] transition break-words [overflow-wrap:anywhere]">
+                        {product.name}
+                      </h3>
+
+                      {/* Star Rating Badge */}
+                      {product.reviews_count > 0 ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <div className="flex items-center gap-0.5 text-amber-500 font-bold text-[11px]">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            <span>{product.average_rating?.toFixed(1) || "0.0"}</span>
+                          </div>
+                          <span className="text-[11px] text-stone-500">
+                            ({product.reviews_count})
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 mt-1 text-[11px] text-stone-400">
+                          <Star className="w-3 h-3 text-stone-300" />
+                          <span>No reviews yet</span>
+                        </div>
+                      )}
+
+                      {/* Product Description */}
+                      <p className="text-stone-600 text-xs mt-1.5 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
+                        {product.description}
+                      </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => addItem(product.id, 1)}
-                        disabled={!isAvailable || isMaxStockReached}
-                        className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#1E3A5F]"
-                        title={
-                          !isAvailable
-                            ? "Out of stock"
-                            : isMaxStockReached
-                            ? "Out of stock"
-                            : "Add to cart"
-                        }
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add</span>
-                      </button>
+                    {/* Footer / Price & Actions */}
+                    <div className="pt-3 border-t border-[#DDD6C8] flex items-center justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] text-stone-500 block uppercase font-medium">Price</span>
+                        <span className="text-base font-bold text-[#2C2A29] font-mono">
+                          ${product.price.toFixed(2)}
+                        </span>
+                      </div>
 
-                      <Link
-                        href={`/products/${product.slug}`}
-                        className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border border-[#D8D4CE] text-xs font-semibold px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs"
-                        title="View full specifications"
-                      >
-                        Details
-                      </Link>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => addItem(product.id, 1)}
+                          disabled={!isAvailable || isMaxStockReached}
+                          className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#1E3A5F]"
+                          title={
+                            !isAvailable
+                              ? "Out of stock"
+                              : isMaxStockReached
+                              ? "Out of stock"
+                              : "Add to cart"
+                          }
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add</span>
+                        </button>
+
+                        <Link
+                          href={`/products/${product.slug}`}
+                          className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border border-[#D8D4CE] text-xs font-semibold px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs"
+                          title="View full specifications"
+                        >
+                          Details
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
