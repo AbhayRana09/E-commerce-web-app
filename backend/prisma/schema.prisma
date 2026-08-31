@@ -162,16 +162,29 @@ model Order {
   address_id          Int
   coupon_id           Int?
   status              OrderStatus  @default(PENDING)
-  cancellation_reason String?
   payment_method      String       @default("MOCK_CARD")
   payment_status      String       @default("PENDING")
-  subtotal       Float
-  shipping_cost  Float       @default(0.0)
-  discount       Float       @default(0.0)
-  tax_amount     Float       @default(0.0)
-  total_amount   Float
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
+
+  // Pricing Breakdown
+  subtotal            Float
+  shipping_cost       Float        @default(0.0)
+  discount            Float        @default(0.0)
+  tax_amount          Float        @default(0.0)
+  total_amount        Float
+
+  // Lifecycle Milestones
+  confirmed_at        DateTime?    @default(now())
+  processing_at       DateTime?
+  shipped_at          DateTime?
+  delivered_at        DateTime?
+
+  // Cancellation Details
+  cancelled_at        DateTime?
+  cancellation_reason String?
+
+  // Audit Timestamps
+  created_at          DateTime     @default(now())
+  updated_at          DateTime     @updatedAt
 
   user    User        @relation(fields: [user_id], references: [id])
   address Address     @relation(fields: [address_id], references: [id])

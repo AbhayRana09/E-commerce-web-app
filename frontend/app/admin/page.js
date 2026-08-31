@@ -38,13 +38,6 @@ export default function AdminDashboardPage() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case "PENDING":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            Pending
-          </span>
-        );
       case "CONFIRMED":
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">

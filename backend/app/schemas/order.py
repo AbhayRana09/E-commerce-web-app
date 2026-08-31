@@ -73,7 +73,6 @@ class OrderOut(BaseModel):
     address_id: int
     coupon_id: Optional[int] = None
     status: OrderStatusEnum
-    cancellation_reason: Optional[str] = None
     payment_method: str
     payment_status: str
     subtotal: float
@@ -81,6 +80,12 @@ class OrderOut(BaseModel):
     discount: float
     tax_amount: float
     total_amount: float
+    confirmed_at: Optional[datetime] = None
+    processing_at: Optional[datetime] = None
+    shipped_at: Optional[datetime] = None
+    delivered_at: Optional[datetime] = None
+    cancelled_at: Optional[datetime] = None
+    cancellation_reason: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     user: Optional[OrderUserOut] = None

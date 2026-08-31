@@ -18,7 +18,7 @@ export async function getProducts(params = {}) {
   if (params.category_id) query.append("category_id", params.category_id);
   if (params.min_price) query.append("min_price", params.min_price);
   if (params.max_price) query.append("max_price", params.max_price);
-  if (params.sort) query.append("sort", params.sort);
+  if (params.sort || params.sort_by) query.append("sort", params.sort || params.sort_by);
   if (params.page) query.append("page", params.page);
   if (params.limit) query.append("limit", params.limit);
 

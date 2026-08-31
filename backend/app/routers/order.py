@@ -1,6 +1,6 @@
 from math import ceil
 from typing import Optional, Any, cast, List
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Body
 
 from app.database import db
@@ -18,6 +18,56 @@ from app.schemas.order import (
 )
 
 router = APIRouter(prefix="/api/orders", tags=["Orders"])
+
+async def sync_order_status_by_time(order: Any) -> None:
+    """Auto-advances non-cancelled orders based on elapsed real-world time since creation (4-day delivery SLA)."""
+    if not order:
+        return
+
+    current_status = order.status.value if hasattr(order.status, "value") else str(order.status)
+    if current_status in ["DELIVERED", "CANCELLED"]:
+        return
+
+    now = datetime.now(timezone.utc)
+    created_at = order.created_at
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+
+    elapsed_hours = (now - created_at).total_seconds() / 3600.0
+
+    target_status = None
+    if elapsed_hours >= 96:  # 4+ days -> DELIVERED
+        target_status = "DELIVERED"
+    elif elapsed_hours >= 48:  # 2-4 days -> SHIPPED
+        target_status = "SHIPPED"
+    elif elapsed_hours >= 24:  # 1-2 days -> PROCESSING
+        target_status = "PROCESSING"
+
+    if target_status and target_status != current_status:
+        update_data: dict[str, Any] = {"status": target_status}
+        if target_status == "PROCESSING" and not getattr(order, "processing_at", None):
+            update_data["processing_at"] = created_at + timedelta(days=1)
+        elif target_status == "SHIPPED":
+            if not getattr(order, "processing_at", None):
+                update_data["processing_at"] = created_at + timedelta(days=1)
+            if not getattr(order, "shipped_at", None):
+                update_data["shipped_at"] = created_at + timedelta(days=2)
+        elif target_status == "DELIVERED":
+            if not getattr(order, "processing_at", None):
+                update_data["processing_at"] = created_at + timedelta(days=1)
+            if not getattr(order, "shipped_at", None):
+                update_data["shipped_at"] = created_at + timedelta(days=2)
+            if not getattr(order, "delivered_at", None):
+                update_data["delivered_at"] = created_at + timedelta(days=4)
+            update_data["payment_status"] = "PAID"
+
+        await db.order.update(
+            where={"id": order.id},
+            data=cast(Any, update_data)
+        )
+        order.status = target_status
+        if target_status == "DELIVERED":
+            order.payment_status = "PAID"
 
 # ----------------------------------------------------
 # ADMIN ANALYTICS & STATS
@@ -113,6 +163,9 @@ async def list_all_orders_admin(
         take=limit
     )
 
+    for order in orders:
+        await sync_order_status_by_time(order)
+
     total = await db.order.count(where=cast(Any, where))
     total_pages = ceil(total / limit) if total > 0 else 1
 
@@ -144,7 +197,16 @@ async def get_order_detail_admin(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
         )
+    await sync_order_status_by_time(order)
     return order
+
+ALLOWED_ORDER_TRANSITIONS: dict[str, list[str]] = {
+    "CONFIRMED": ["PROCESSING", "CANCELLED"],
+    "PROCESSING": ["SHIPPED", "CANCELLED"],
+    "SHIPPED": ["DELIVERED", "CANCELLED"],
+    "DELIVERED": [],
+    "CANCELLED": [],
+}
 
 @router.patch("/admin/{order_id}/status", response_model=OrderOut)
 async def update_order_status_admin(
@@ -152,17 +214,75 @@ async def update_order_status_admin(
     status_in: OrderStatusUpdate,
     current_admin=Depends(require_admin)
 ):
-    """Update order lifecycle status (Admin only)."""
-    order = await db.order.find_unique(where={"id": order_id})
+    """Update order lifecycle status with strict state machine validation (Admin only)."""
+    order = await db.order.find_unique(
+        where={"id": order_id},
+        include=cast(Any, {"items": True})
+    )
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
         )
 
+    current_status = order.status.value if hasattr(order.status, "value") else str(order.status)
+    new_status = status_in.status.value
+
+    if current_status == new_status:
+        # Re-fetch with full relations to match response model
+        full_order = await db.order.find_unique(
+            where={"id": order_id},
+            include=cast(Any, {
+                "user": True,
+                "address": True,
+                "coupon": True,
+                "items": {"include": {"product": True}}
+            })
+        )
+        return full_order
+
+    allowed_next = ALLOWED_ORDER_TRANSITIONS.get(current_status, [])
+    if new_status not in allowed_next:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status transition: Cannot change order status from '{current_status}' to '{new_status}'. Allowed next states: {allowed_next if allowed_next else 'None (Terminal state)'}."
+        )
+
+    # Restock inventory if cancelling an order that was not previously cancelled
+    if new_status == "CANCELLED" and current_status != "CANCELLED":
+        if order.items:
+            for item in order.items:
+                await db.product.update(
+                    where={"id": item.product_id},
+                    data=cast(Any, {"stock_quantity": {"increment": item.quantity}})
+                )
+
+    now_ts = datetime.now(timezone.utc)
+    update_data: dict[str, Any] = {"status": new_status}
+    if new_status == "PROCESSING" and not getattr(order, "processing_at", None):
+        update_data["processing_at"] = now_ts
+    elif new_status == "SHIPPED":
+        if not getattr(order, "processing_at", None):
+            update_data["processing_at"] = now_ts
+        if not getattr(order, "shipped_at", None):
+            update_data["shipped_at"] = now_ts
+    elif new_status == "DELIVERED":
+        if not getattr(order, "processing_at", None):
+            update_data["processing_at"] = now_ts
+        if not getattr(order, "shipped_at", None):
+            update_data["shipped_at"] = now_ts
+        if not getattr(order, "delivered_at", None):
+            update_data["delivered_at"] = now_ts
+        update_data["payment_status"] = "PAID"
+    if new_status == "CANCELLED":
+        if not getattr(order, "cancelled_at", None):
+            update_data["cancelled_at"] = now_ts
+        if not order.cancellation_reason:
+            update_data["cancellation_reason"] = "Cancelled by Administrator"
+
     updated_order = await db.order.update(
         where={"id": order_id},
-        data=cast(Any, {"status": status_in.status.value}),
+        data=cast(Any, update_data),
         include=cast(Any, {
             "user": True,
             "address": True,
@@ -252,7 +372,7 @@ async def create_order(
             "user_id": current_user.id,
             "address_id": address.id,
             "coupon_id": coupon_id,
-            "status": "PENDING" if payload.payment_method != "COD" else "CONFIRMED",
+            "status": "CONFIRMED",
             "payment_method": payload.payment_method,
             "payment_status": "PENDING",
             "subtotal": subtotal,
@@ -352,6 +472,8 @@ async def get_my_orders(current_user=Depends(get_current_user)):
         }),
         order=cast(Any, {"created_at": "desc"})
     )
+    for order in orders:
+        await sync_order_status_by_time(order)
     return orders
 
 @router.get("/{order_id}", response_model=OrderOut)
@@ -381,6 +503,7 @@ async def get_single_order(
             detail="You do not have access to this order."
         )
 
+    await sync_order_status_by_time(order)
     return order
 
 @router.patch("/{order_id}/cancel", response_model=OrderOut)
@@ -420,6 +543,7 @@ async def cancel_my_order(
         where={"id": order_id},
         data=cast(Any, {
             "status": "CANCELLED",
+            "cancelled_at": datetime.now(timezone.utc),
             "cancellation_reason": reason_str
         }),
         include=cast(Any, {

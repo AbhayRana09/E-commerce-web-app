@@ -50,7 +50,7 @@ function HomeContent() {
       const data = await getProducts({
         search: search.trim() || undefined,
         category_id: selectedCategory ? parseInt(selectedCategory, 10) : undefined,
-        sort_by: sort,
+        sort,
         page,
         limit: 12,
       });
@@ -311,39 +311,51 @@ function HomeContent() {
                     </div>
 
                     {/* Footer / Price & Actions */}
-                    <div className="pt-3 border-t border-[#DDD6C8] flex items-center justify-between gap-2">
-                      <div>
-                        <span className="text-[10px] text-stone-500 block uppercase font-medium">Price</span>
-                        <span className="text-base font-bold text-[#2C2A29] font-mono">
-                          ${product.price.toFixed(2)}
-                        </span>
+                    <div className="pt-3 border-t border-[#DDD6C8] space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] text-stone-500 block uppercase font-medium">Price</span>
+                          <span className="text-base font-bold text-[#2C2A29] font-mono">
+                            ${product.price.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => addItem(product.id, 1)}
+                            disabled={!isAvailable || isMaxStockReached}
+                            className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#1E3A5F]"
+                            title={
+                              !isAvailable
+                                ? "Out of stock"
+                                : isMaxStockReached
+                                ? "Max limit reached"
+                                : "Add to cart"
+                            }
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>{inCartQty > 0 ? `Add (${inCartQty})` : "Add"}</span>
+                          </button>
+
+                          <Link
+                            href={`/products/${product.slug}`}
+                            className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border border-[#D8D4CE] text-xs font-semibold px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs"
+                            title="View full specifications"
+                          >
+                            Details
+                          </Link>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => addItem(product.id, 1)}
-                          disabled={!isAvailable || isMaxStockReached}
-                          className="bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#1E3A5F]"
-                          title={
-                            !isAvailable
-                              ? "Out of stock"
-                              : isMaxStockReached
-                              ? "Out of stock"
-                              : "Add to cart"
-                          }
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add</span>
-                        </button>
-
-                        <Link
-                          href={`/products/${product.slug}`}
-                          className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-[#2C2A29] border border-[#D8D4CE] text-xs font-semibold px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs"
-                          title="View full specifications"
-                        >
-                          Details
-                        </Link>
+                      {/* Fixed-height reserved status line so all cards align identically */}
+                      <div className="h-4 flex items-center justify-end">
+                        {isMaxStockReached && (
+                          <span className="text-[10px] font-semibold text-amber-800 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+                            <span>Max limit reached</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
