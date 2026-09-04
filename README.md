@@ -159,4 +159,4 @@ The goal of this project was to build an end-to-end online shopping platform wit
 
 ## Author & Project Notes
 
-This project was built independently as a hands-on implementation of full-stack web technologies and software design patterns.
+This project was built independently as a hands-on implementation of full-stack web technologies.

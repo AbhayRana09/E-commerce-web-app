@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import RouteGuard from "@/components/RouteGuard";
 import { getProducts, getCategories } from "@/lib/products";
+import CatalogChatDrawer from "@/components/chat/CatalogChatDrawer";
 import {
   ArrowUpDown,
   X,
@@ -95,7 +96,7 @@ function HomeContent() {
   return (
     <div className="space-y-8 py-4 w-full max-w-[1700px] mx-auto">
       {/* Hero Welcome Banner */}
-      <div className="rounded-3xl bg-[#ECE8DF] border border-[#DDD6C8] p-6 sm:p-8 relative overflow-hidden shadow-xs">
+      <div className="rounded-3xl bg-[#ECE8DF] border border-[#DDD6C8] p-6 sm:p-8 relative overflow-hidden shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="max-w-3xl space-y-2 relative z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-[#1E3A5F] bg-[#FFFFFF] border border-[#D8D4CE] rounded-full shadow-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-[#1E3A5F] animate-pulse"></span>
@@ -107,7 +108,7 @@ function HomeContent() {
           </h1>
 
           <p className="text-stone-600 text-xs sm:text-sm leading-relaxed max-w-2xl">
-            Browse our full catalog, search products globally in the header, or select a category above.
+            Browse our full catalog, search products globally, or ask our AI Shopping Assistant for tailored recommendations.
           </p>
         </div>
       </div>
@@ -154,8 +155,8 @@ function HomeContent() {
             {selectedCategory
               ? categories.find((c) => String(c.id) === String(selectedCategory))?.name || "Selected Category"
               : search
-              ? `Search Results for "${search}"`
-              : "All Available Products"}
+                ? `Search Results for "${search}"`
+                : "All Available Products"}
           </h2>
           <span className="text-xs text-stone-500 font-mono">
             {totalProducts} product{totalProducts === 1 ? "" : "s"} found
@@ -249,18 +250,16 @@ function HomeContent() {
                         e.stopPropagation();
                         toggleWishlist(product);
                       }}
-                      className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full flex items-center justify-center transition shadow-xs cursor-pointer ${
-                        isInWishlist(product.id)
+                      className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full flex items-center justify-center transition shadow-xs cursor-pointer ${isInWishlist(product.id)
                           ? "bg-rose-500 text-white hover:bg-rose-600 scale-105"
                           : "bg-[#FFFFFF]/90 hover:bg-[#FFFFFF] text-stone-600 hover:text-rose-500 border border-[#D8D4CE]"
-                      }`}
+                        }`}
                       title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
                       aria-label="Toggle Wishlist"
                     >
                       <Heart
-                        className={`w-4 h-4 transition-transform active:scale-125 ${
-                          isInWishlist(product.id) ? "fill-current" : ""
-                        }`}
+                        className={`w-4 h-4 transition-transform active:scale-125 ${isInWishlist(product.id) ? "fill-current" : ""
+                          }`}
                       />
                     </button>
 
@@ -330,8 +329,8 @@ function HomeContent() {
                               !isAvailable
                                 ? "Out of stock"
                                 : isMaxStockReached
-                                ? "Max limit reached"
-                                : "Add to cart"
+                                  ? "Max limit reached"
+                                  : "Add to cart"
                             }
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -392,6 +391,9 @@ function HomeContent() {
           </div>
         )}
       </div>
+
+      {/* ✨ Floating Catalog AI Assistant Widget (Bottom-Right) */}
+      <CatalogChatDrawer />
     </div>
   );
 }

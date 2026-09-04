@@ -7,6 +7,7 @@ import { getMyReviews, deleteProductReview } from "@/lib/reviews";
 import { useToast } from "@/context/ToastContext";
 import RouteGuard from "@/components/RouteGuard";
 import RateOrderProductModal from "@/components/reviews/RateOrderProductModal";
+import OrdersChatDrawer from "@/components/chat/OrdersChatDrawer";
 import {
   MoreVertical,
   FileText,
@@ -1203,6 +1204,9 @@ function OrdersContent() {
         existingReview={reviewingProduct ? userReviewsMap[reviewingProduct.id] : null}
         onReviewSubmitted={fetchOrders}
       />
+
+      {/* ✨ Floating Orders AI Assistant Widget (Bottom-Right) */}
+      <OrdersChatDrawer />
     </div>
   );
 }

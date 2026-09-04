@@ -11,6 +11,7 @@ from app.routers.cart import router as cart_router
 from app.routers.coupon import router as coupon_router
 from app.routers.wishlist import router as wishlist_router
 from app.routers.review import router as review_router
+from app.routers.chat import router as chat_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,6 +50,7 @@ app.include_router(cart_router)
 app.include_router(coupon_router)
 app.include_router(wishlist_router)
 app.include_router(review_router)
+app.include_router(chat_router)
 
 @app.get("/")
 async def root():

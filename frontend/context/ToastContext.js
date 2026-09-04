@@ -36,10 +36,10 @@ export function ToastProvider({ children }) {
       return [...capped, { id, message: cleanMessage, type }];
     });
 
-    // Auto-dismiss after 4 seconds
+    // Auto-dismiss after 3.2 seconds
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    }, 3200);
   }, []);
 
   const removeToast = useCallback((id) => {
@@ -54,7 +54,8 @@ export function ToastProvider({ children }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto w-fit max-w-full inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border shadow-xl backdrop-blur-xl transition-all duration-300 animate-in fade-in-0 slide-in-from-top-3 min-w-0 ${
+            onClick={() => removeToast(toast.id)}
+            className={`pointer-events-auto w-fit max-w-full inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border shadow-xl backdrop-blur-xl transition-all duration-300 animate-in fade-in-0 slide-in-from-top-3 min-w-0 cursor-pointer select-none ${
               toast.type === "error"
                 ? "bg-rose-50 border-rose-300 text-rose-950 shadow-rose-950/10"
                 : toast.type === "success"

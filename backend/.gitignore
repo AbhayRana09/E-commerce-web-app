@@ -1,5 +1,15 @@
-node_modules
 # Keep environment variables out of version control
 .env
+.env.*
+*.env
 
+# Python & virtualenv artifacts
+__pycache__/
+*.py[cod]
+venv/
+.pytest_cache/
+
+# Prisma & node
+node_modules/
 /generated/prisma
+

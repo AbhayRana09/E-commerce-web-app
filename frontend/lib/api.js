@@ -36,14 +36,32 @@ api.interceptors.response.use(
     if (typeof detail === "string") {
       message = detail;
     } else if (Array.isArray(detail)) {
-      // FastAPI 422 validation errors are returned as a list of error objects
-      message = detail
-        .map((err) => {
-          const field = err.loc ? err.loc[err.loc.length - 1] : "";
-          const msg = err.msg || "Invalid input";
-          return field ? `${field}: ${msg}` : msg;
-        })
-        .join(" | ");
+      // Check if validation errors are due to missing or too short fields
+      const isRequiredOrShortError = detail.some(
+        (err) =>
+          err.type?.includes("missing") ||
+          err.type?.includes("too_short") ||
+          (err.msg && (err.msg.toLowerCase().includes("required") || err.msg.toLowerCase().includes("at least")))
+      );
+
+      if (isRequiredOrShortError) {
+        message = "Please complete all required fields";
+      } else {
+        message = detail
+          .map((err) => {
+            let field = err.loc ? err.loc[err.loc.length - 1] : "";
+            let msg = err.msg || "Invalid input";
+
+            if (field) {
+              const formattedField = field
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, (c) => c.toUpperCase());
+              return `${formattedField}: ${msg}`;
+            }
+            return msg;
+          })
+          .join(" • ");
+      }
     } else if (detail && typeof detail === "object") {
       message = detail.message || detail.msg || JSON.stringify(detail);
     } else if (error.message) {

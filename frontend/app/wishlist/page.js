@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
 import RouteGuard from "@/components/RouteGuard";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import {
   Heart,
   ShoppingCart,
@@ -19,7 +18,6 @@ function WishlistContent() {
   const { items, totalWishlistItems, loading, removeItem, moveItemToCart, clearAll } = useWishlist();
   const { showToast } = useToast();
 
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [movingId, setMovingId] = useState(null);
   const [movingAll, setMovingAll] = useState(false);
 
@@ -79,8 +77,29 @@ function WishlistContent() {
     }
   };
 
+  if (items.length === 0 && !loading) {
+    return (
+      <div className="py-20 text-center max-w-md mx-auto space-y-4 bg-[#ECE8DF] p-8 rounded-3xl border border-[#DDD6C8] shadow-xs">
+        <div className="w-16 h-16 rounded-3xl bg-[#FFFFFF] text-rose-500 border border-[#D8D4CE] flex items-center justify-center mx-auto shadow-xs">
+          <Heart className="w-8 h-8 fill-current" />
+        </div>
+        <h2 className="text-xl font-bold text-[#2C2A29]">Your Wishlist is Empty</h2>
+        <p className="text-xs text-stone-600 leading-relaxed">
+          Explore our store catalog and click the heart icon on any product to save items you love.
+        </p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 mt-2 bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition shadow-xs"
+        >
+          <span>Explore Catalog</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8 py-4">
+    <div className="w-full max-w-[1700px] mx-auto space-y-8 py-2">
       {/* Header Banner */}
       <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
         <div>
@@ -108,8 +127,9 @@ function WishlistContent() {
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => setShowClearConfirm(true)}
-              className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-rose-700 hover:text-rose-800 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-[#D8D4CE] transition cursor-pointer shadow-xs"
+              onClick={clearAll}
+              disabled={movingAll || loading || items.length === 0}
+              className="bg-[#FFFFFF] hover:bg-[#ECE8DF] text-rose-700 hover:text-rose-800 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-[#D8D4CE] transition cursor-pointer shadow-xs disabled:opacity-50"
             >
               Clear All
             </button>
@@ -118,32 +138,10 @@ function WishlistContent() {
       </div>
 
       {/* Loading Skeleton */}
-      {loading && items.length === 0 ? (
+      {loading ? (
         <div className="py-24 text-center space-y-3">
           <div className="w-8 h-8 border-3 border-[#1E3A5F] border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-xs text-stone-500">Loading your saved items...</p>
-        </div>
-      ) : items.length === 0 ? (
-        /* Empty State */
-        <div className="bg-[#ECE8DF] border border-[#DDD6C8] rounded-3xl p-12 sm:p-16 text-center space-y-4 shadow-xs">
-          <div className="w-16 h-16 rounded-3xl bg-[#FFFFFF] border border-[#D8D4CE] flex items-center justify-center mx-auto text-3xl shadow-xs">
-            <Heart className="w-8 h-8 text-rose-500 fill-rose-500" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-lg sm:text-xl font-bold text-[#2C2A29]">
-              Your wishlist is currently empty
-            </h2>
-            <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto">
-              Explore our catalogue and click the heart icon on any product to save it for later.
-            </p>
-          </div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#152843] text-white text-xs sm:text-sm font-semibold px-6 py-3 rounded-xl transition shadow-xs"
-          >
-            <span>Explore Catalog</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
       ) : (
         /* Wishlist Grid */
@@ -264,19 +262,6 @@ function WishlistContent() {
           })}
         </div>
       )}
-
-      {/* Clear Wishlist Confirmation Dialog */}
-      <ConfirmDialog
-        open={showClearConfirm}
-        onOpenChange={setShowClearConfirm}
-        title="Clear Wishlist"
-        message="Are you sure you want to remove all items from your wishlist? This action cannot be undone."
-        actionType="delete"
-        onConfirm={async () => {
-          await clearAll();
-          setShowClearConfirm(false);
-        }}
-      />
     </div>
   );
 }
